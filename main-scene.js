@@ -28,6 +28,8 @@ import { Text_Demo }
   from "./examples/text-demo.js"
 import { Transforms_Sandbox }
   from "./examples/transforms-sandbox.js"
+import { Balance_Ball }
+  from "./examples/balance-ball.js"
 
 Object.assign( defs,
                      { Axes_Viewer, Axes_Viewer_Test_Scene },
@@ -37,13 +39,13 @@ Object.assign( defs,
                      { Scene_To_Texture_Demo },
                      { Surfaces_Demo },
                      { Text_Demo },
-                     { Transforms_Sandbox } );
+                     { Transforms_Sandbox }, { Balance_Ball } );
 
     // ******************** End extra step
 
 // (Can define Main_Scene's class here)
 
-const Main_Scene = Transforms_Sandbox;
+const Main_Scene = Balance_Ball;
 const Additional_Scenes = [];
 
 export { Main_Scene, Additional_Scenes, Canvas_Widget, Code_Widget, Text_Widget, defs }
