@@ -14,7 +14,9 @@ export class Balance_Ball extends Scene
     // would be redundant to tell it again.  You should just re-use the
     // one called "box" more than once in display() to draw multiple cubes.
     // Don't define more than one blueprint for the same thing here.
-    this.shapes = { 'ball' : new Subdivision_Sphere( 4 ) };
+    this.shapes = { 'ball' : new Subdivision_Sphere( 4 ),
+                    'box': new Cube()
+                  };
 
     // *** Materials: *** Define a shader, and then define materials that use
     // that shader.  Materials wrap a dictionary of "options" for the shader.
@@ -25,14 +27,16 @@ export class Balance_Ball extends Scene
     this.materials = { plastic: new Material( phong,
         { ambient: .2, diffusivity: 1, specularity: .5, color: color( .9,.5,.9,1 ) } ),
       ball: new Material( phong,
-        { ambient: 1, diffusivity: 1, specularity:  1, color: color( .9,.5,.9,1 ) } ) };
+        { ambient: 1, diffusivity: 1, specularity:  1, color: color( .9,.5,.9,1 ) } ),
+    };
+
     this.initial_camera_location = Mat4.look_at( vec3( 0,10,20 ), vec3( 0,0,0 ), vec3( 0,1,0 ) );
 
     this.ball = Mat4.identity();
     this.vx = 0;
     this.vz = 0;
 
-    this.left = this.right = this.forward = this.back = false;
+    this.left = this.right = this.forward = this.back = this.safe = false;
   }
   make_control_panel()
   {                                 // make_control_panel(): Sets up a panel of interactive HTML elements, including
@@ -72,10 +76,42 @@ export class Balance_Ball extends Scene
      **********************************/
     const t = program_state.animation_time/1000;
     const dt = program_state.animation_delta_time/1000;
-
+    
+    const g = 9.8;
     const blue = color( 0,0,1,1 ), yellow = color( 1,1,0,1 );
 
     this.ball = this.ball.times(Mat4.translation(this.vx*dt,0,this.vz*dt));
+    
+    /* draw boxes */
+    let box_m = Mat4.identity().times(Mat4.translation(0,-1,-2)).times(Mat4.scale(1.2,0.2,1));
+    for (var i = 0; i < 8; i++){
+      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
+      box_m = box_m.times(Mat4.translation(0,0,2));
+    }
+    for (var i = 0; i < 4; i++){
+      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
+      box_m = box_m.times(Mat4.translation(2,0,0));
+    }
+    for (var i = 0; i < 9; i++){
+      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
+      box_m = box_m.times(Mat4.translation(0,0,-2));
+    }
+
+    /* falling */
+    if (this.ball[2][3] >= -3.5 && this.ball[2][3] <= 13 && this.ball[0][3] >= -1.5 && this.ball[0][3] <= 1.5){
+      this.safe = true;
+    }
+    if (this.ball[2][3] >= 13 && this.ball[2][3] <= 15.5 && this.ball[0][3] >= -1.5 && this.ball[0][3] <= 9.5){
+      this.safe = true;
+    }
+    if (this.ball[2][3] >= -5.5  && this.ball[2][3] <= 13 && this.ball[0][3] >= 6.5 && this.ball[0][3] <= 9.5){
+      this.safe = true;
+    }
+    if (!this.safe){
+      this.ball = this.ball.times(Mat4.translation(0,-0.05*t, 0));
+    }
+    /* ------ end ------ */
+
     if (this.left) {
       this.vx = this.vx - 50 * dt;
     } else {
@@ -120,7 +156,7 @@ export class Balance_Ball extends Scene
       }
     }
 
-    this.left = this.right = this.forward = this.back = false;
+    this.left = this.right = this.forward = this.back = this.safe = false;
     console.log(this.left);
     this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override( blue ) );
     if (typeof this.attached !== 'undefined') {
