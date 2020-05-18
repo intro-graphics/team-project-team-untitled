@@ -41,8 +41,13 @@ export class Balance_Ball extends Scene
   make_control_panel()
   {                                 // make_control_panel(): Sets up a panel of interactive HTML elements, including
     // buttons with key bindings for affecting this scene, and live info readouts.
-    this.key_triggered_button( "Fixed View",  [ "b" ], () => this.attached = () => this.ball );
-    this.key_triggered_button( "Panorama View",  [ "p" ], () => this.attached = () => this.initial_camera_location );
+    // this.key_triggered_button( "Fixed View",  [ "b" ], () => this.attached = () => this.ball );
+    // this.key_triggered_button( "Panorama View",  [ "p" ], () => this.attached = () => this.initial_camera_location );
+    this.key_triggered_button( "Fixed View",  [ "b" ], () => this.attached = () => Mat4.look_at(
+                                          vec3(this.ball[0][3], this.ball[1][3] + 2, this.ball[2][3] + 10),
+                                          vec3(this.ball[0][3], this.ball[1][3], this.ball[2][3]),
+                                          vec3(0,1,1)));
+    this.key_triggered_button( "Panorama View",  [ "p" ], () => this.attached = () => Mat4.look_at( vec3( 0,30,0 ), vec3( 0,0,0 ), vec3( 0,0,-1 ) ) );
     this.new_line();
     this.key_triggered_button( "Left",  [ "j" ], () => this.left = true );
     this.key_triggered_button( "Right",  [ "l" ], () => this.right = true );
@@ -81,9 +86,9 @@ export class Balance_Ball extends Scene
     const blue = color( 0,0,1,1 ), yellow = color( 1,1,0,1 );
 
     this.ball = this.ball.times(Mat4.translation(this.vx*dt,0,this.vz*dt));
-    
+
     /* draw boxes */
-    let box_m = Mat4.identity().times(Mat4.translation(0,-1,-2)).times(Mat4.scale(1.2,0.2,1));
+    let box_m = Mat4.identity().times(Mat4.translation(0,-1.2,-2)).times(Mat4.scale(1.2,0.2,1));
     for (var i = 0; i < 8; i++){
       this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
       box_m = box_m.times(Mat4.translation(0,0,2));
