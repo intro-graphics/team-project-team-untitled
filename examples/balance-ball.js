@@ -15,10 +15,10 @@ export class Balance_Ball extends Scene {
     this.shapes = {
       'ball': new Subdivision_Sphere(4),
       'box': new Cube(),
-      'torus': new Torus(30,30),
+      'torus': new Torus(30,30,[ [ 0, 2 ], [ 0, 1 ] ]),
       'bonus1': new (Subdivision_Sphere)(4),
       'bonus2': new (Subdivision_Sphere)(2),
-      'bonus_ring': new (Torus.prototype.make_flat_shaded_version())(15,15),
+      'bonus_ring': new (Torus.prototype.make_flat_shaded_version())(15,15, [[0,2],[0,1]]),
     };
 
     // *** Materials: *** Define a shader, and then define materials that use
@@ -69,8 +69,6 @@ export class Balance_Ball extends Scene {
   }
   make_control_panel() {                                 // make_control_panel(): Sets up a panel of interactive HTML elements, including
     // buttons with key bindings for affecting this scene, and live info readouts.
-    // this.key_triggered_button( "Fixed View",  [ "b" ], () => this.attached = () => this.ball );
-    // this.key_triggered_button( "Panorama View",  [ "p" ], () => this.attached = () => this.initial_camera_location );
     this.key_triggered_button("Fixed View", ["b"], () => this.attached = () => Mat4.look_at(
       vec3(this.ball[0][3], this.ball[1][3] + 2, this.ball[2][3] + 10),
       vec3(this.ball[0][3], this.ball[1][3], this.ball[2][3]),
@@ -108,7 +106,6 @@ export class Balance_Ball extends Scene {
      **********************************/
     const t = program_state.animation_time / 1000;
     const dt = program_state.animation_delta_time / 1000;
-
     const g = 9.8;
     const blue = color(0, 0, 1, 1), yellow = color(1, 1, 0, 1);
 
@@ -116,16 +113,24 @@ export class Balance_Ball extends Scene {
     this.x += this.vx*dt;
     this.y += this.vy*dt;
     this.z += this.vz*dt;
-
     this.anglex += this.vz*dt/(Math.PI);
     this.anglez += this.vx*dt/(Math.PI);
-    /* draw boxes */
+
+    /* Draw some road */
     let box_m = Mat4.identity().times(Mat4.translation(0, -1.2, -2)).times(Mat4.scale(1.2, 0.2, 1));
-    
     for (var i = 0; i < 8; i++) {
       this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
       box_m = box_m.times(Mat4.translation(0, 0, 2));
     }
+    for (var i = 0; i < 4; i++) {
+      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
+      box_m = box_m.times(Mat4.translation(2, 0, 0));
+    }
+    for (var i = 0; i < 9; i++) {
+      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
+      box_m = box_m.times(Mat4.translation(0, 0, -2));
+    }
+    ///TODO: put a goal at the end?
 
     /* START - draw bonus shapes */
     this.sun_r = 2 + Math.sin(0.8 *  Math.PI * t);
@@ -140,7 +145,7 @@ export class Balance_Ball extends Scene {
     let sin_m = Mat4.translation(0, 2.5+2.5 * Math.sin(0.4 * Math.PI * t), 0);
     let bonus2_m = Mat4.translation(5, 0, 14.).times(sin_m);
 
-    // Detect collision
+    /* Detect collision */
     if (((14-this.z)**2 + (0-this.x)**2)**(1/2) <= 2)
       this.bonus1_hit = true;
     if (((bonus2_m[2][3] - this.z)**2 + (bonus2_m[1][3] - this.y)**2 + (bonus2_m[0][3] - this.x)**2)**(1/2) <= 2)
@@ -157,19 +162,10 @@ export class Balance_Ball extends Scene {
       this.shapes.bonus2.draw(context, program_state, bonus2_m, this.materials.bonus2);
     //this.shapes.bonus_ring.draw(context, program_state, bonus2_m.times(wobble).times(Mat4.scale(1, 1, 0.01)), this.materials.bonus_ring);
     
-     /* END - draw bonus shapes */
+    /* END - draw bonus shapes */
 
 
-    for (var i = 0; i < 4; i++) {
-      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
-      box_m = box_m.times(Mat4.translation(2, 0, 0));
-    }
-    for (var i = 0; i < 9; i++) {
-      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
-      box_m = box_m.times(Mat4.translation(0, 0, -2));
-    }
-
-    /* falling */
+    /* Falling */
     if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 1.8){
       this.safe = true;
     }
@@ -185,8 +181,9 @@ export class Balance_Ball extends Scene {
         this.vy = -50;
       }
     }
-    /* ------ end ------ */
 
+
+    /* START - Calculate the velocity */
     if (this.left) {
       this.vx = this.vx - 100 * dt;
     } else {
@@ -230,13 +227,13 @@ export class Balance_Ball extends Scene {
         }
       }
     }
-
-    this.left = this.right = this.forward = this.back = this.safe = false;
-
-    this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override( blue ) );
+    /* END - Calculate the velocity */
+    
+    this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override( blue ) );   // render the ball
     if (typeof this.attached !== 'undefined') {
       program_state.set_camera(this.attached().times(Mat4.translation(0, -2, -10)));
     }
+    this.left = this.right = this.forward = this.back = this.safe = false;    // reset
   }
 }
 
