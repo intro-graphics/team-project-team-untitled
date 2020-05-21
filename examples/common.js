@@ -80,6 +80,30 @@ class Ring_Shader extends Shader // Subclasses of Shader each store and manage a
   }
 }
 
+const Diamond = def.Diamond =
+class Diamond extends Shape
+{   constructor (rows, columns, texture_range)
+    {   super( "positions", "normals", "texture_coords" );
+        Cone_Tip.insert_transformed_copy_into(this, [rows, columns, texture_range]);
+        Cone_Tip.insert_transformed_copy_into(this, [rows, columns, texture_range], (Mat4.translation(0,0,-2)).times(Mat4.rotation(Math.PI, 1,0,0)));
+    }
+}
+
+const Diamond_Ring = def.Diamond_Ring =
+class Diamond_Ring extends Shape
+{   constructor (rows, columns, texture_range)
+    {   super( "positions", "normals", "texture_coords" );
+        for (var i = 0; i < 12; i++){
+            Diamond.insert_transformed_copy_into(this, [rows, columns, texture_range], 
+                        (Mat4.scale(.05,.05,.05))
+                        .times(Mat4.translation(10*Math.cos(i*Math.PI/6), 10*Math.sin(i*Math.PI/6), 0))
+                        .times(Mat4.rotation(i*Math.PI/6, 0,0,1))
+                        .times(Mat4.rotation(Math.PI/2, 1,0,0)));
+        }
+    }
+}
+
+
 /* END - Shapes in Balance Ball */
 
 
