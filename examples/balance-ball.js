@@ -153,7 +153,6 @@ export class Balance_Ball extends Scene {
     }
 
     /* falling */
-<<<<<<< HEAD
     if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 1.8){
       this.safe = true;
     }
@@ -161,15 +160,6 @@ export class Balance_Ball extends Scene {
       this.safe = true;
     }
     if (this.ball[2][3] >= -4.8  && this.ball[2][3] <= 13 && this.ball[0][3] >= 6.2 && this.ball[0][3] <= 9.8){
-=======
-    if (this.ball[2][3] >= -3.5 && this.ball[2][3] <= 13 && this.ball[0][3] >= -1.5 && this.ball[0][3] <= 1.5) {
-      this.safe = true;
-    }
-    if (this.ball[2][3] >= 13 && this.ball[2][3] <= 15.5 && this.ball[0][3] >= -1.5 && this.ball[0][3] <= 9.5) {
-      this.safe = true;
-    }
-    if (this.ball[2][3] >= -5.5 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6.5 && this.ball[0][3] <= 9.5) {
->>>>>>> 7798a5564267932074d56b43091a29c0497ac5d3
       this.safe = true;
     }
     if (!this.safe) {
@@ -222,15 +212,10 @@ export class Balance_Ball extends Scene {
     }
 
     this.left = this.right = this.forward = this.back = this.safe = false;
-<<<<<<< HEAD
     console.log(this.left);
 
     /// do rotation here??
     this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override( blue ) );
-=======
-
-    this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override(yellow));
->>>>>>> 7798a5564267932074d56b43091a29c0497ac5d3
     if (typeof this.attached !== 'undefined') {
       program_state.set_camera(this.attached().times(Mat4.translation(0, -2, -10)));
     }
