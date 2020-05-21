@@ -15,6 +15,7 @@ export class Balance_Ball extends Scene {
     this.shapes = {
       'ball': new Subdivision_Sphere(4),
       'box': new Cube(),
+      'torus': new Torus(30,30),
       'bonus1': new (Subdivision_Sphere)(4),
       'bonus2': new (Subdivision_Sphere)(2),
       'bonus_ring': new (Torus.prototype.make_flat_shaded_version())(15,15),
@@ -64,7 +65,7 @@ export class Balance_Ball extends Scene {
     this.vy = 0;
     this.vz = 0;
 
-    this.left = this.right = this.forward = this.back = this.safe = false;
+    this.left = this.right = this.forward = this.back = this.safe = this.bonus1_hit = this.bonus2_hit = false;
   }
   make_control_panel() {                                 // make_control_panel(): Sets up a panel of interactive HTML elements, including
     // buttons with key bindings for affecting this scene, and live info readouts.
@@ -133,17 +134,27 @@ export class Balance_Ball extends Scene {
     this.sun_color = color(red, green, 0, 1);
 
     let bonus1_m = Mat4.translation(0, 0, 14);
-    this.shapes.bonus1.draw(context, program_state, bonus1_m, this.materials.bonus1.override({
-      color: this.sun_color
-    }));
 
     let angle = 0.5 * Math.sin(0.4 * Math.PI * t);
     let wobble = Mat4.rotation(angle,1, 1, 0);
-    let bonus2_m = Mat4.translation(5, 0, 14);
     let sin_m = Mat4.translation(0, 2.5+2.5 * Math.sin(0.4 * Math.PI * t), 0);
+    let bonus2_m = Mat4.translation(5, 0, 14.).times(sin_m);
 
+    // Detect collision
+    if (((14-this.z)**2 + (0-this.x)**2)**(1/2) <= 2)
+      this.bonus1_hit = true;
+    if (((bonus2_m[2][3] - this.z)**2 + (bonus2_m[1][3] - this.y)**2 + (bonus2_m[0][3] - this.x)**2)**(1/2) <= 2)
+      this.bonus2_hit = true;
     
-    this.shapes.bonus2.draw(context, program_state, bonus2_m.times(sin_m), this.materials.bonus2);
+    if (this.bonus1_hit)        /// don't know what to do lol
+      ;
+    else
+      this.shapes.bonus1.draw(context, program_state, bonus1_m, this.materials.bonus1.override({ color: this.sun_color }));
+
+    if (this.bonus2_hit)        /// fix this
+      ;         
+    else
+      this.shapes.bonus2.draw(context, program_state, bonus2_m, this.materials.bonus2);
     //this.shapes.bonus_ring.draw(context, program_state, bonus2_m.times(wobble).times(Mat4.scale(1, 1, 0.01)), this.materials.bonus_ring);
     
      /* END - draw bonus shapes */
@@ -170,8 +181,8 @@ export class Balance_Ball extends Scene {
     }
     if (!this.safe) {
       this.vy -= 10 * g * dt;
-      if (this.vy > 50) {
-        this.vy = 50;
+      if (this.vy < -50) {
+        this.vy = -50;
       }
     }
     /* ------ end ------ */
@@ -221,9 +232,7 @@ export class Balance_Ball extends Scene {
     }
 
     this.left = this.right = this.forward = this.back = this.safe = false;
-    console.log(this.left);
 
-    /// do rotation here??
     this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override( blue ) );
     if (typeof this.attached !== 'undefined') {
       program_state.set_camera(this.attached().times(Mat4.translation(0, -2, -10)));
