@@ -23,16 +23,18 @@ export class Balance_Ball extends Scene
     // Here we use a Phong shader and the Material stores the scalar
     // coefficients that appear in the Phong lighting formulas so that the
     // appearance of particular materials can be tweaked via these numbers.
-    const phong = new defs.Phong_Shader();
-    this.materials = { plastic: new Material( phong,
-        { ambient: .2, diffusivity: 1, specularity: .5, color: color( .9,.5,.9,1 ) } ),
-      ball: new Material( phong,
-        { ambient: 1, diffusivity: 1, specularity:  1, color: color( .9,.5,.9,1 ) } ),
+    const shader = new defs.Fake_Bump_Map( 1 );
+    this.materials = {
+      ball: new Material(shader, { color: color( .4,.8,.4,1 ),
+    ambient:.4, texture: new Texture( "assets/stars.png" ) } )
     };
 
     this.initial_camera_location = Mat4.look_at( vec3( 0,10,20 ), vec3( 0,0,0 ), vec3( 0,1,0 ) );
 
     this.ball = Mat4.identity();
+    this.x = 0;
+    this.z = 0;
+    this.anglex
     this.vx = 0;
     this.vz = 0;
 
@@ -85,8 +87,9 @@ export class Balance_Ball extends Scene
     const g = 9.8;
     const blue = color( 0,0,1,1 ), yellow = color( 1,1,0,1 );
 
-    this.ball = this.ball.times(Mat4.translation(this.vx*dt,0,this.vz*dt));
-
+    this.ball = this.ball.times(Mat4.translation(this.vx*dt,0,this.vz*dt)).times(Mat4.rotation(this.vz*dt/(2*Math.PI),1,0,0));
+    this.x += this.vx*dt;
+    this.z += this.vz*dt;
     /* draw boxes */
     let box_m = Mat4.identity().times(Mat4.translation(0,-1.2,-2)).times(Mat4.scale(1.2,0.2,1));
     for (var i = 0; i < 8; i++){
@@ -163,7 +166,7 @@ export class Balance_Ball extends Scene
 
     this.left = this.right = this.forward = this.back = this.safe = false;
     console.log(this.left);
-    this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override( blue ) );
+    this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override(yellow));
     if (typeof this.attached !== 'undefined') {
       program_state.set_camera(this.attached().times(Mat4.translation(0, -2, -10)));
     }
