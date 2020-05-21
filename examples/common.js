@@ -10,6 +10,79 @@ const defs = {};
 
 export { tiny, defs };
 
+
+/* START - Shapes in Balance Ball */
+const Ring_Shader = defs.Ring_Shader =
+class Ring_Shader extends Shader // Subclasses of Shader each store and manage a complete GPU program.
+{
+
+  constructor( num_lights = 2 )
+  { super(); 
+    this.num_lights = num_lights;
+  }
+
+  material() {
+    return {
+      shader: this
+    }
+  }
+  // Materials here are minimal, without any settings.
+  map_attribute_name_to_buffer_name(name) // The shader will pull single entries out of the vertex arrays, by their data fields'
+  {
+    // names.  Map those names onto the arrays we'll pull them from.  This determines
+    // which kinds of Shapes this Shader is compatible with.  Thanks to this function, 
+    // Vertex buffers in the GPU can get their pointers matched up with pointers to 
+    // attribute names in the GPU.  Shapes and Shaders can still be compatible even
+    // if some vertex data feilds are unused. 
+    return {
+      object_space_pos: "positions"
+    }[name];
+    // Use a simple lookup table.
+  }
+  // Define how to synchronize our JavaScript's variables to the GPU's:
+  update_GPU(g_state, model_transform, material, gpu=this.g_addrs, gl=this.gl) {
+    const proj_camera = g_state.projection_transform.times(g_state.camera_transform);
+    // Send our matrices to the shader programs:
+    gl.uniformMatrix4fv(gpu.model_transform_loc, false, Mat.flatten_2D_to_1D(model_transform.transposed()));
+    gl.uniformMatrix4fv(gpu.projection_camera_transform_loc, false, Mat.flatten_2D_to_1D(proj_camera.transposed()));
+  }
+  shared_glsl_code() // ********* SHARED CODE, INCLUDED IN BOTH SHADERS *********
+  {
+    return `precision mediump float;
+              varying vec4 position;
+              varying vec4 center;
+      `;
+  }
+  vertex_glsl_code() // ********* VERTEX SHADER *********
+  {
+    return `
+        attribute vec3 object_space_pos;
+        uniform mat4 model_transform;
+        uniform mat4 projection_camera_transform;
+
+        void main()
+        { 
+          center = vec4( 0, 0, 0, 1) * model_transform;
+          position = vec4( object_space_pos, 1);
+          gl_Position = projection_camera_transform * model_transform * position;
+        }`;
+    // TODO:  Complete the main function of the vertex shader (Extra Credit Part II).
+  }
+  fragment_glsl_code() // ********* FRAGMENT SHADER *********
+  {
+    return `
+        void main()
+        { 
+          float color_str = sin(8.0 * 3.1416 * distance(center, position));
+          gl_FragColor = color_str * vec4( 0.6, 0.3, 0.0, 1.0);
+        }`;
+    // TODO:  Complete the main function of the fragment shader (Extra Credit Part II).
+  }
+}
+
+/* END - Shapes in Balance Ball */
+
+
 const Triangle = defs.Triangle =
 class Triangle extends Shape
 {                                 // **Triangle** The simplest possible 2D Shape – one triangle.  It stores 3 vertices, each
