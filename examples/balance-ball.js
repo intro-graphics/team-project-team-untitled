@@ -58,6 +58,7 @@ export class Balance_Ball extends Scene {
     this.x = 0;
     this.z = 0;
     this.anglex = 0;
+    this.anglez = 0;
     this.vx = 0;
     this.vz = 0;
 
@@ -108,10 +109,12 @@ export class Balance_Ball extends Scene {
     const g = 9.8;
     const blue = color(0, 0, 1, 1), yellow = color(1, 1, 0, 1);
 
-    this.ball = this.ball.times(Mat4.translation(this.vx*dt,0,this.vz*dt)).times(Mat4.rotation(this.vz*dt/(2*Math.PI),1,0,0));
+    this.ball = Mat4.identity().times(Mat4.translation(this.x,0,this.z)).times(Mat4.rotation(this.anglex,1,0,0)).times(Mat4.rotation(this.anglez,0,1,0));
     this.x += this.vx*dt;
     this.z += this.vz*dt;
 
+    this.anglex += this.vz*dt/(Math.PI);
+    this.anglez += this.vx*dt/(Math.PI);
     /* draw boxes */
     let box_m = Mat4.identity().times(Mat4.translation(0, -1.2, -2)).times(Mat4.scale(1.2, 0.2, 1));
     
@@ -168,7 +171,7 @@ export class Balance_Ball extends Scene {
     /* ------ end ------ */
 
     if (this.left) {
-      this.vx = this.vx - 50 * dt;
+      this.vx = this.vx - 100 * dt;
     } else {
       if (this.vx < 0) {
         this.vx = this.vx + 10 * dt;
@@ -179,7 +182,7 @@ export class Balance_Ball extends Scene {
     }
 
     if (this.right) {
-      this.vx = this.vx + 50 * dt;
+      this.vx = this.vx + 100 * dt;
     } else {
       if (this.vx > 0) {
         this.vx = this.vx - 10 * dt;
@@ -190,7 +193,7 @@ export class Balance_Ball extends Scene {
     }
 
     if (this.forward) {
-      this.vz = this.vz - 50 * dt;
+      this.vz = this.vz - 100 * dt;
     } else {
       if (this.vz < 0) {
         this.vz = this.vz + 10 * dt;
@@ -201,7 +204,7 @@ export class Balance_Ball extends Scene {
     }
 
     if (this.back) {
-      this.vz = this.vz + 50 * dt;
+      this.vz = this.vz + 100 * dt;
     } else {
       if (this.vz > 0) {
         this.vz = this.vz - 10 * dt;
