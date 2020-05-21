@@ -56,10 +56,12 @@ export class Balance_Ball extends Scene {
 
     this.ball = Mat4.identity();
     this.x = 0;
+    this.y = 0;
     this.z = 0;
     this.anglex = 0;
     this.anglez = 0;
     this.vx = 0;
+    this.vy = 0;
     this.vz = 0;
 
     this.left = this.right = this.forward = this.back = this.safe = false;
@@ -109,8 +111,9 @@ export class Balance_Ball extends Scene {
     const g = 9.8;
     const blue = color(0, 0, 1, 1), yellow = color(1, 1, 0, 1);
 
-    this.ball = Mat4.identity().times(Mat4.translation(this.x,0,this.z)).times(Mat4.rotation(this.anglex,1,0,0)).times(Mat4.rotation(this.anglez,0,1,0));
+    this.ball = Mat4.identity().times(Mat4.translation(this.x,this.y,this.z)).times(Mat4.rotation(this.anglex,1,0,0)).times(Mat4.rotation(this.anglez,0,1,0));
     this.x += this.vx*dt;
+    this.y += this.vy*dt;
     this.z += this.vz*dt;
 
     this.anglex += this.vz*dt/(Math.PI);
@@ -166,7 +169,10 @@ export class Balance_Ball extends Scene {
       this.safe = true;
     }
     if (!this.safe) {
-      this.ball = this.ball.times(Mat4.translation(0, -0.05 * t, 0));
+      this.vy -= 10 * g * dt;
+      if (this.vy > 50) {
+        this.vy = 50;
+      }
     }
     /* ------ end ------ */
 
