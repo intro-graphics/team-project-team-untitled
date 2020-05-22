@@ -2,7 +2,7 @@ import { tiny, defs } from './common.js';
 
 // Pull these names into this module's scope for convenience:
 const { vec3, vec4, color, Mat4, Light, Shape, Material, Shader, Texture, Scene } = tiny;
-const { Triangle, Square, Tetrahedron, Windmill, Cube, Subdivision_Sphere, Ring_Shader, Torus } = defs;
+const { Triangle, Square, Tetrahedron, Windmill, Cube, Subdivision_Sphere, Ring_Shader, Torus, Diamond_Ring } = defs;
 
 export class Balance_Ball extends Scene {
   constructor() {                  // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
@@ -19,6 +19,7 @@ export class Balance_Ball extends Scene {
       'bonus1': new (Subdivision_Sphere)(4),
       'bonus2': new (Subdivision_Sphere)(2),
       'bonus_ring': new (Torus.prototype.make_flat_shaded_version())(15,15, [[0,2],[0,1]]),
+      'Diamond_ring': new Diamond_Ring(4,4,[[0,1], [0,1]]),
     };
 
     // *** Materials: *** Define a shader, and then define materials that use
@@ -164,6 +165,9 @@ export class Balance_Ball extends Scene {
     
     /* END - draw bonus shapes */
 
+    let ring_m = Mat4.identity().times(Mat4.translation(10,0,-6)).times(Mat4.rotation(t*Math.PI/2, 1,0,0))
+                                .times(Mat4.scale(.2, .2, .2));
+    this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({color: color(.5, .7, .95, 1)}));    // goal
 
     /* Falling */
     if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 1.8){
