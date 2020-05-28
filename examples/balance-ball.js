@@ -5,7 +5,8 @@ const { vec3, vec4, color, Mat4, Light, Shape, Material, Shader, Texture, Scene 
 const { Triangle, Square, Tetrahedron, Windmill, Cube, Subdivision_Sphere, Ring_Shader, Torus, Diamond_Ring } = defs;
 
 export class Balance_Ball extends Scene {
-  constructor() {                  // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
+  constructor() {
+    // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
     super();
     // At the beginning of our program, load one of each of these shape
     // definitions onto the GPU.  NOTE:  Only do this ONCE per shape it
@@ -15,26 +16,30 @@ export class Balance_Ball extends Scene {
     this.shapes = {
       'ball': new Subdivision_Sphere(4),
       'box': new Cube(),
-      'torus': new Torus(30,30,[ [ 0, 2 ], [ 0, 1 ] ]),
+      'torus': new Torus(30, 30, [[0, 2], [0, 1]]),
       'bonus1': new (Subdivision_Sphere)(4),
       'bonus2': new (Subdivision_Sphere)(2),
-      'bonus_ring': new (Torus.prototype.make_flat_shaded_version())(15,15, [[0,2],[0,1]]),
-      'Diamond_ring': new Diamond_Ring(4,4,[[0,1], [0,1]]),
+      'bonus_ring': new (Torus.prototype.make_flat_shaded_version())(15, 15, [[0, 2], [0, 1]]),
+      'Diamond_ring': new Diamond_Ring(4, 4, [[0, 1], [0, 1]]),
     };
+
+    /* START - define moving lights */
 
     this.light_positions = [];
     this.rows = 19
     this.columns = 10;
-    this.row_lights = {};    
+    this.row_lights = {};
     this.column_lights = {};
 
-    for(   let row = 0;       row < this.rows;       row++ ) 
-        for( let column = 0; column < this.columns; column++ )
-          this.light_positions.push( vec3( row, -2-2*Math.random(), -column ).randomized( 1 ) );
-    for( let c = 0; c < this.columns; c++ )
-        this.row_lights    [ ~~(-c) ] = vec3( 2*Math.random()*this.rows, -Math.random(), -c     );
+    for (let row = 0; row < this.rows; row++)
+      for (let column = 0; column < this.columns; column++)
+        this.light_positions.push(vec3(row, -2 - 2 * Math.random(), -column).randomized(1));
+    for (let c = 0; c < this.columns; c++)
+      this.row_lights[~~(-c)] = vec3(2 * Math.random() * this.rows, -Math.random(), -c);
+    for (let r = 0; r < this.rows; r++)
+      this.column_lights[~~(r)] = vec3(r, -Math.random(), -2 * Math.random() * this.columns);
 
-
+    /* END - define moving lights */
 
     // *** Materials: *** Define a shader, and then define materials that use
     // that shader.  Materials rap a dictionary of "options" for the shader.
@@ -42,30 +47,40 @@ export class Balance_Ball extends Scene {
     // coefficients that appear in the Phong lighting formulas so that the
     // appearance of particular materials can be tweaked via these numbers.
 
-    const shader = new defs.Fake_Bump_Map( 1 );
+    const shader = new defs.Fake_Bump_Map(1);
     const phong = new defs.Phong_Shader();
     const ring = Ring_Shader;
     this.materials = {
-      plastic: new Material(phong,
-        { ambient: .2, diffusivity: 1, specularity: .5, color: color(.9, .5, .9, 1) }),
-      ball: new Material(shader, { color: color( .4,.8,.4,1 ),
-        ambient:.4, texture: new Texture( "assets/stars.png" ) }),
-      bonus1: new Material(phong, {color: color(0.6, 0.3, 0, 1.0),
-          ambient: 0.7,
-          specular: 1,
-          diffusivity: 1,
-        }),
-      bonus2: new Material(phong, {color: color(0.6, 0.3, 0, 1.0),
-          ambient: 0.5,
-          specular: 1,
-          diffusivity: 1,
-        }),
+      plastic: new Material(phong, {
+        ambient: .2,
+        diffusivity: 1,
+        specularity: .5,
+        color: color(.9, .5, .9, 1)
+      }),
+      ball: new Material(shader, {
+        color: color(.4, .8, .4, 1),
+        ambient: .4,
+        texture: new Texture("assets/stars.png")
+      }),
+      bonus1: new Material(phong, {
+        color: color(0.6, 0.3, 0, 1.0),
+        ambient: 0.7,
+        specular: 1,
+        diffusivity: 1,
+      }),
+      bonus2: new Material(phong, {
+        color: color(0.6, 0.3, 0, 1.0),
+        ambient: 0.5,
+        specular: 1,
+        diffusivity: 1,
+      }),
 
-      bonus_ring: new Material(ring, {color: color(0.6, 0.3, 0, 1.0),
-          ambient: 0.5,
-          specular: 1,
-          diffusivity: 1,
-        }),
+      bonus_ring: new Material(ring, {
+        color: color(0.6, 0.3, 0, 1.0),
+        ambient: 0.5,
+        specular: 1,
+        diffusivity: 1,
+      }),
     };
 
     this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -82,12 +97,10 @@ export class Balance_Ball extends Scene {
 
     this.left = this.right = this.forward = this.back = this.safe = this.bonus1_hit = this.bonus2_hit = false;
   }
-  make_control_panel() {                                 // make_control_panel(): Sets up a panel of interactive HTML elements, including
+  make_control_panel() {
+    // make_control_panel(): Sets up a panel of interactive HTML elements, including
     // buttons with key bindings for affecting this scene, and live info readouts.
-    this.key_triggered_button("Fixed View", ["b"], () => this.attached = () => Mat4.look_at(
-      vec3(this.ball[0][3], this.ball[1][3] + 2, this.ball[2][3] + 10),
-      vec3(this.ball[0][3], this.ball[1][3], this.ball[2][3]),
-      vec3(0, 1, 1)));
+    this.key_triggered_button("Fixed View", ["b"], () => this.attached = () => Mat4.look_at(vec3(this.ball[0][3], this.ball[1][3] + 2, this.ball[2][3] + 10), vec3(this.ball[0][3], this.ball[1][3], this.ball[2][3]), vec3(0, 1, 1)));
     this.key_triggered_button("Panorama View", ["p"], () => this.attached = () => Mat4.look_at(vec3(0, 30, 0), vec3(0, 0, 0), vec3(0, 0, -1)));
     this.new_line();
     this.key_triggered_button("Left", ["j"], () => this.left = true);
@@ -96,7 +109,8 @@ export class Balance_Ball extends Scene {
     this.key_triggered_button("Forward", ["i"], () => this.forward = true);
     this.key_triggered_button("Back", ["k"], () => this.back = true);
   }
-  display(context, program_state) {                                                // display():  Called once per frame of animation.
+  display(context, program_state) {
+    // display():  Called once per frame of animation.
 
     // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
     if (!context.scratchpad.controls) {
@@ -115,23 +129,32 @@ export class Balance_Ball extends Scene {
     // *** Lights: *** Values of vector or point lights.  They'll be consulted by
     // the shader when coloring shapes.  See Light's class definition for inputs.
 
-    this.light_positions.forEach( (p,i,a) =>
-        { program_state.lights = [ new Light( this.row_lights   [ ~~p[2] ].to4(1), color( p[2]%1,1,1,1 ), 9 ) ];
-                                            // Draw the box:
-        } );
-    for( const [key,val] of Object.entries( this.row_lights ) ) 
-    { this.   row_lights[key][0] += program_state.animation_delta_time/50;
-      this.   row_lights[key][0] %= this.rows*2;
+    /* START - draw moving lights */
+    this.light_positions.forEach((p, i, a) => {
+      program_state.lights = [new Light(this.row_lights[~~p[2]].to4(1), color(p[2] % 1, 1, 1, 1), 9),
+      new Light(this.column_lights[~~p[0]].to4(1), color(1, 1, p[0] % 1, 1), 9),
+    ];
     }
+    );
+    for (const [key, val] of Object.entries(this.row_lights)) {
+      this.row_lights[key][0] += program_state.animation_delta_time / 1000;
+      this.row_lights[key][0] %= this.rows * 2;
+    }
+    for (const [key, val] of Object.entries(this.column_lights)) {
+    this.column_lights[key][2] -= program_state.animation_delta_time / 1000;
+      this.column_lights[key][2] %= this.columns * 2;
+    }
+
+    /* END - draw moving lights */
 
     // program_state.lights = [
     //     new Light(vec4(5, -10, 5, 1), color(1, 1, 1, 1), 10000),
     //     new Light( this.row_lights   [ ~~p[2] ].to4(1), color( p[2]%1,1,1,1 ), 9 )
     // ];
-    
-    for( const [key,val] of Object.entries( this.row_lights ) ) 
-    { this.   row_lights[key][0] += program_state.animation_delta_time/50;
-      this.   row_lights[key][0] %= this.rows*2;
+
+    for (const [key, val] of Object.entries(this.row_lights)) {
+      this.row_lights[key][0] += program_state.animation_delta_time / 50;
+      this.row_lights[key][0] %= this.rows * 2;
     }
 
     /**********************************
@@ -140,14 +163,15 @@ export class Balance_Ball extends Scene {
     const t = program_state.animation_time / 1000;
     const dt = program_state.animation_delta_time / 1000;
     const g = 9.8;
-    const blue = color(0, 0, 1, 1), yellow = color(1, 1, 0, 1);
+    const blue = color(0, 0, 1, 1)
+      , yellow = color(1, 1, 0, 1);
 
-    this.ball = Mat4.identity().times(Mat4.translation(this.x,this.y,this.z)).times(Mat4.rotation(this.anglex,1,0,0)).times(Mat4.rotation(this.anglez,0,1,0));
-    this.x += this.vx*dt;
-    this.y += this.vy*dt;
-    this.z += this.vz*dt;
-    this.anglex += this.vz*dt/(Math.PI);
-    this.anglez += this.vx*dt/(Math.PI);
+    this.ball = Mat4.identity().times(Mat4.translation(this.x, this.y, this.z)).times(Mat4.rotation(this.anglex, 1, 0, 0)).times(Mat4.rotation(this.anglez, 0, 1, 0));
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.z += this.vz * dt;
+    this.anglex += this.vz * dt / (Math.PI);
+    this.anglez += this.vx * dt / (Math.PI);
 
     /* Draw some road */
     let box_m = Mat4.identity().times(Mat4.translation(0, -1.2, -2)).times(Mat4.scale(1.2, 0.2, 1));
@@ -180,7 +204,7 @@ export class Balance_Ball extends Scene {
     ///TODO: put a goal at the end?
 
     /* START - draw bonus shapes */
-    this.sun_r = 2 + Math.sin(0.8 *  Math.PI * t);
+    this.sun_r = 2 + Math.sin(0.8 * Math.PI * t);
     let red = 0.5 + 0.5 * Math.sin(0.4 * Math.PI * t);
     let green = 0.5 + 0.5 * Math.sin(0.4 * Math.PI * t - Math.PI);
     this.sun_color = color(red, green, 0, 1);
@@ -188,41 +212,47 @@ export class Balance_Ball extends Scene {
     let bonus1_m = Mat4.translation(0, 0, 14);
 
     let angle = 0.5 * Math.sin(0.4 * Math.PI * t);
-    let wobble = Mat4.rotation(angle,1, 1, 0);
-    let sin_m = Mat4.translation(0, 2.5+2.5 * Math.sin(0.4 * Math.PI * t), 0);
+    let wobble = Mat4.rotation(angle, 1, 1, 0);
+    let sin_m = Mat4.translation(0, 2.5 + 2.5 * Math.sin(0.4 * Math.PI * t), 0);
     let bonus2_m = Mat4.translation(5, 0, 14.).times(sin_m);
 
     /* Detect collision */
-    if (((14-this.z)**2 + (0-this.x)**2)**(1/2) <= 2)
+    if (((14 - this.z) ** 2 + (0 - this.x) ** 2) ** (1 / 2) <= 2)
       this.bonus1_hit = true;
-    if (((bonus2_m[2][3] - this.z)**2 + (bonus2_m[1][3] - this.y)**2 + (bonus2_m[0][3] - this.x)**2)**(1/2) <= 2)
+    if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 2)
       this.bonus2_hit = true;
-    
-    if (this.bonus1_hit)        /// don't know what to do lol
+
+    if (this.bonus1_hit)
+      /// don't know what to do lol
       ;
     else
-      this.shapes.bonus1.draw(context, program_state, bonus1_m, this.materials.bonus1.override({ color: this.sun_color }));
+      this.shapes.bonus1.draw(context, program_state, bonus1_m, this.materials.bonus1.override({
+        color: this.sun_color
+      }));
 
-    if (this.bonus2_hit)        /// fix this
-      ;         
+    if (this.bonus2_hit)
+      /// fix this
+      ;
     else
       this.shapes.bonus2.draw(context, program_state, bonus2_m, this.materials.bonus2);
     //this.shapes.bonus_ring.draw(context, program_state, bonus2_m.times(wobble).times(Mat4.scale(1, 1, 0.01)), this.materials.bonus_ring);
-    
+
     /* END - draw bonus shapes */
 
-    let ring_m = Mat4.identity().times(Mat4.translation(10,0,-6)).times(Mat4.rotation(t*Math.PI/2, 1,0,0))
-                                .times(Mat4.scale(.2, .2, .2));
-    this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({color: color(.5, .7, .95, 1)}));    // goal
+    let ring_m = Mat4.identity().times(Mat4.translation(10, 0, -6)).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
+    this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({
+      color: color(.5, .7, .95, 1)
+    }));
+    // goal
 
     /* Falling */
-    if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 1.8){
+    if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 1.8) {
       this.safe = true;
     }
-    if (this.ball[2][3] >= 13 && this.ball[2][3] <= 15.8 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 9.8){
+    if (this.ball[2][3] >= 13 && this.ball[2][3] <= 15.8 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 9.8) {
       this.safe = true;
     }
-    if (this.ball[2][3] >= -4.8  && this.ball[2][3] <= 13 && this.ball[0][3] >= 6.2 && this.ball[0][3] <= 9.8){
+    if (this.ball[2][3] >= -4.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6.2 && this.ball[0][3] <= 9.8) {
       this.safe = true;
     }
     if (!this.safe) {
@@ -231,7 +261,6 @@ export class Balance_Ball extends Scene {
         this.vy = -50;
       }
     }
-
 
     /* START - Calculate the velocity */
     if (this.left) {
@@ -278,12 +307,13 @@ export class Balance_Ball extends Scene {
       }
     }
     /* END - Calculate the velocity */
-    
-    this.shapes.ball.draw( context, program_state, this.ball, this.materials.ball.override( blue ) );   // render the ball
+
+    this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball.override(blue));
+    // render the ball
     if (typeof this.attached !== 'undefined') {
       program_state.set_camera(this.attached().times(Mat4.translation(0, -2, -10)));
     }
-    this.left = this.right = this.forward = this.back = this.safe = false;    // reset
+    this.left = this.right = this.forward = this.back = this.safe = false;
+    // reset
   }
 }
-
