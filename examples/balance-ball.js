@@ -22,6 +22,20 @@ export class Balance_Ball extends Scene {
       'Diamond_ring': new Diamond_Ring(4,4,[[0,1], [0,1]]),
     };
 
+    this.light_positions = [];
+    this.rows = 19
+    this.columns = 10;
+    this.row_lights = {};    
+    this.column_lights = {};
+
+    for(   let row = 0;       row < this.rows;       row++ ) 
+        for( let column = 0; column < this.columns; column++ )
+          this.light_positions.push( vec3( row, -2-2*Math.random(), -column ).randomized( 1 ) );
+    for( let c = 0; c < this.columns; c++ )
+        this.row_lights    [ ~~(-c) ] = vec3( 2*Math.random()*this.rows, -Math.random(), -c     );
+
+
+
     // *** Materials: *** Define a shader, and then define materials that use
     // that shader.  Materials rap a dictionary of "options" for the shader.
     // Here we use a Phong shader and the Material stores the scalar
@@ -100,7 +114,25 @@ export class Balance_Ball extends Scene {
 
     // *** Lights: *** Values of vector or point lights.  They'll be consulted by
     // the shader when coloring shapes.  See Light's class definition for inputs.
-    program_state.lights = [new Light(vec4(5, -10, 5, 1), color(1, 1, 1, 1), 1000000)];
+
+    this.light_positions.forEach( (p,i,a) =>
+        { program_state.lights = [ new Light( this.row_lights   [ ~~p[2] ].to4(1), color( p[2]%1,1,1,1 ), 9 ) ];
+                                            // Draw the box:
+        } );
+    for( const [key,val] of Object.entries( this.row_lights ) ) 
+    { this.   row_lights[key][0] += program_state.animation_delta_time/50;
+      this.   row_lights[key][0] %= this.rows*2;
+    }
+
+    // program_state.lights = [
+    //     new Light(vec4(5, -10, 5, 1), color(1, 1, 1, 1), 10000),
+    //     new Light( this.row_lights   [ ~~p[2] ].to4(1), color( p[2]%1,1,1,1 ), 9 )
+    // ];
+    
+    for( const [key,val] of Object.entries( this.row_lights ) ) 
+    { this.   row_lights[key][0] += program_state.animation_delta_time/50;
+      this.   row_lights[key][0] %= this.rows*2;
+    }
 
     /**********************************
      Start coding down here!!!!
@@ -127,10 +159,24 @@ export class Balance_Ball extends Scene {
       this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
       box_m = box_m.times(Mat4.translation(2, 0, 0));
     }
-    for (var i = 0; i < 9; i++) {
+    for (var i = 0; i < 15; i++) {
       this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
       box_m = box_m.times(Mat4.translation(0, 0, -2));
     }
+
+    // Branched route
+    let box_m_1 = box_m;
+    for (var i = 0; i < 15; i++) {
+      this.shapes.box.draw(context, program_state, box_m_1, this.materials.ball);
+      box_m_1 = box_m_1.times(Mat4.translation(2, 0, 0));
+    }
+
+    let box_m_2 = box_m;
+    for (var i = 0; i < 15; i++) {
+      this.shapes.box.draw(context, program_state, box_m_2, this.materials.ball);
+      box_m_2 = box_m_2.times(Mat4.translation(0, 0, -2));
+    }
+
     ///TODO: put a goal at the end?
 
     /* START - draw bonus shapes */
