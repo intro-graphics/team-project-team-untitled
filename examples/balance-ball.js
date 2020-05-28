@@ -201,6 +201,17 @@ export class Balance_Ball extends Scene {
       box_m_2 = box_m_2.times(Mat4.translation(0, 0, -2));
     }
 
+    for (var i = 0; i < 15; i++) {
+      this.shapes.box.draw(context, program_state, box_m_1, this.materials.ball);
+      box_m_1 = box_m_1.times(Mat4.translation(0, 0, -2));
+    }
+
+    for (var i = 0; i < 15; i++) {
+      this.shapes.box.draw(context, program_state, box_m_2, this.materials.ball);
+      box_m_2 = box_m_2.times(Mat4.translation(2, 0, 0));
+    }
+    box_m = box_m_2;
+
     ///TODO: put a goal at the end?
 
     /* START - draw bonus shapes */
