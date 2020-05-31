@@ -101,7 +101,7 @@ export class Balance_Ball extends Scene {
     // make_control_panel(): Sets up a panel of interactive HTML elements, including
     // buttons with key bindings for affecting this scene, and live info readouts.
     this.key_triggered_button("Fixed View", ["b"], () => this.attached = () => Mat4.look_at(vec3(this.ball[0][3], this.ball[1][3] + 2, this.ball[2][3] + 10), vec3(this.ball[0][3], this.ball[1][3], this.ball[2][3]), vec3(0, 1, 1)));
-    this.key_triggered_button("Panorama View", ["p"], () => this.attached = () => Mat4.look_at(vec3(0, 30, 0), vec3(0, 0, 0), vec3(0, 0, -1)));
+    this.key_triggered_button("Panorama View", ["p"], () => this.attached = () => Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1)));
     this.new_line();
     this.key_triggered_button("Left", ["j"], () => this.left = true);
     this.key_triggered_button("Right", ["l"], () => this.right = true);
@@ -173,7 +173,7 @@ export class Balance_Ball extends Scene {
     this.anglex += this.vz * dt / (Math.PI);
     this.anglez += this.vx * dt / (Math.PI);
 
-    /* Draw some road */
+    /* START - Draw some road */
     let box_m = Mat4.identity().times(Mat4.translation(0, -1.2, -2)).times(Mat4.scale(1.2, 0.2, 1));
     for (var i = 0; i < 8; i++) {
       this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
@@ -190,30 +190,42 @@ export class Balance_Ball extends Scene {
 
     // Branched route
     let box_m_1 = box_m;
+    // 1    /// TO FIX: ROLLING BECOMES STRANGE HERE
     for (var i = 0; i < 15; i++) {
       this.shapes.box.draw(context, program_state, box_m_1, this.materials.ball);
       box_m_1 = box_m_1.times(Mat4.translation(2, 0, 0));
     }
 
     let box_m_2 = box_m;
+    // 2
     for (var i = 0; i < 15; i++) {
       this.shapes.box.draw(context, program_state, box_m_2, this.materials.ball);
       box_m_2 = box_m_2.times(Mat4.translation(0, 0, -2));
     }
-
+    // 3
     for (var i = 0; i < 15; i++) {
       this.shapes.box.draw(context, program_state, box_m_1, this.materials.ball);
       box_m_1 = box_m_1.times(Mat4.translation(0, 0, -2));
     }
-
-    for (var i = 0; i < 15; i++) {
+    // 4
+    for (var i = 0; i < 14; i++) {
       this.shapes.box.draw(context, program_state, box_m_2, this.materials.ball);
       box_m_2 = box_m_2.times(Mat4.translation(2, 0, 0));
     }
     box_m = box_m_2;
 
-    ///TODO: put a goal at the end?
+    // goal
+    let ring_m = Mat4.identity().times(Mat4.translation(0,1,-1)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
+    let ring_m_2 = Mat4.identity().times(Mat4.translation(0,1,-1)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 0, 1, 1)).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(.2, .2, .2));
+    this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({
+      color: color(.5, .7, .95, 1)
+    }));
+    this.shapes.Diamond_ring.draw(context, program_state, ring_m_2, this.materials.plastic.override({
+      color: color(.5, .7, .95, 1)
+    }));
 
+    /* END - Draw some road */
+    
     /* START - draw bonus shapes */
     this.sun_r = 2 + Math.sin(0.8 * Math.PI * t);
     let red = 0.5 + 0.5 * Math.sin(0.4 * Math.PI * t);
@@ -250,20 +262,28 @@ export class Balance_Ball extends Scene {
 
     /* END - draw bonus shapes */
 
-    let ring_m = Mat4.identity().times(Mat4.translation(10, 0, -6)).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
-    this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({
-      color: color(.5, .7, .95, 1)
-    }));
-    // goal
 
-    /* Falling */
-    if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 1.8) {
+    /* START - Falling */
+    if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -2 && this.ball[0][3] <= 2) {
       this.safe = true;
     }
-    if (this.ball[2][3] >= 13 && this.ball[2][3] <= 15.8 && this.ball[0][3] >= -1.8 && this.ball[0][3] <= 9.8) {
+    if (this.ball[2][3] >= 12 && this.ball[2][3] <= 16 && this.ball[0][3] >= -2 && this.ball[0][3] <= 12) {
       this.safe = true;
     }
-    if (this.ball[2][3] >= -4.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6.2 && this.ball[0][3] <= 9.8) {
+    // 2
+    if (this.ball[2][3] >= -47 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6 && this.ball[0][3] <= 12) {
+      this.safe = true;
+    }
+    // 4
+    if (this.ball[2][3] >= -47 && this.ball[2][3] <= -44 && this.ball[0][3] >= 6 && this.ball[0][3] <= 42.5) {
+      this.safe = true;
+    }
+    // 3 
+    if (this.ball[2][3] >= -45 && this.ball[2][3] <= -14 && this.ball[0][3] >= 36 && this.ball[0][3] <= 46) {
+      this.safe = true;
+    }
+    // 1
+    if (this.ball[2][3] >= -18 && this.ball[2][3] <= -14 && this.ball[0][3] >= 6 && this.ball[0][3] <= 46) {
       this.safe = true;
     }
     if (!this.safe) {
@@ -272,6 +292,7 @@ export class Balance_Ball extends Scene {
         this.vy = -50;
       }
     }
+    /* END - Falling */
 
     /* START - Calculate the velocity */
     if (this.left) {
