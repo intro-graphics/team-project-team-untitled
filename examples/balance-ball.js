@@ -61,7 +61,13 @@ export class Balance_Ball extends Scene {
       sky: new Material(shader, {
         color: color(0, 0, 0, 1),
         ambient: 1,
-        texture: new Texture("assets/sky.png")
+        texture: new Texture("assets/space1.jpg")
+      }),
+      black: new Material(phong, {
+        ambient: .2,
+        diffusivity: 0,
+        specularity: 0,
+        color: color(0, 0, 0, 1)
       }),
       plastic: new Material(phong, {
         ambient: .2,
@@ -186,7 +192,9 @@ export class Balance_Ball extends Scene {
     //this.shapes.background.draw(context, program_state, background_m, this.materials.background);
 
     let background_m = Mat4.identity().times(Mat4.scale(100, 100, 100));
+    let black_hole_m = Mat4.identity().times(Mat4.translation(7,-80,-3).times(Mat4.scale(20,50,20))).times(Mat4.rotation(Math.PI/2, 1,0,0))
     this.shapes.sky.draw(context, program_state, background_m, this.materials.sky);
+    this.shapes.bonus1.draw(context, program_state, black_hole_m, this.materials.black);
     /* END - drawing background */
 
     /* START - update ball's position */
