@@ -26,8 +26,8 @@ export class Balance_Ball extends Scene {
     /* START - define moving lights */
 
     this.light_positions = [];
-    this.rows = 19
-    this.columns = 10;
+    this.rows = 25;
+    this.columns = 50;
     this.row_lights = {};
     this.column_lights = {};
 
@@ -95,7 +95,8 @@ export class Balance_Ball extends Scene {
     this.vy = 0;
     this.vz = 0;
 
-    this.left = this.right = this.forward = this.back = this.safe = this.bonus1_hit = this.bonus2_hit = false;
+    this.left = this.right = this.forward = this.back = false;
+    this.safe = this.near_goal = this.bonus1_hit = this.bonus2_hit = false;
   }
   make_control_panel() {
     // make_control_panel(): Sets up a panel of interactive HTML elements, including
@@ -131,31 +132,31 @@ export class Balance_Ball extends Scene {
 
     /* START - draw moving lights */
     this.light_positions.forEach((p, i, a) => {
-      program_state.lights = [new Light(this.row_lights[~~p[2]].to4(1), color(p[2] % 1, 1, 1, 1), 9),
-      new Light(this.column_lights[~~p[0]].to4(1), color(1, 1, p[0] % 1, 1), 9),
+      program_state.lights = [
+      //new Light(this.column_lights[~~p[0]].to4(1), color(1, 1, p[0] % 1, 1), 9),
+      new Light(this.row_lights[~~p[2]].to4(1), color(p[2] % 1, 1, 1, 1), 9),
+      new Light(vec4(44, 20, -49, 1), color(1,1,1,1), 1000),
     ];
     }
     );
-    for (const [key, val] of Object.entries(this.row_lights)) {
-      this.row_lights[key][0] += program_state.animation_delta_time / 1000;
-      this.row_lights[key][0] %= this.rows * 2;
-    }
+    // for (const [key, val] of Object.entries(this.row_lights)) {
+    //   this.row_lights[key][0] += program_state.animation_delta_time / 1000;
+    //   this.row_lights[key][0] %= this.rows * 2;
+    // }
     for (const [key, val] of Object.entries(this.column_lights)) {
     this.column_lights[key][2] -= program_state.animation_delta_time / 1000;
       this.column_lights[key][2] %= this.columns * 2;
     }
-
+    for (const [key, val] of Object.entries(this.row_lights)) {
+      this.row_lights[key][0] += program_state.animation_delta_time / 50;
+      this.row_lights[key][0] %= this.rows * 2;
+    }
     /* END - draw moving lights */
 
     // program_state.lights = [
     //     new Light(vec4(5, -10, 5, 1), color(1, 1, 1, 1), 10000),
     //     new Light( this.row_lights   [ ~~p[2] ].to4(1), color( p[2]%1,1,1,1 ), 9 )
     // ];
-
-    for (const [key, val] of Object.entries(this.row_lights)) {
-      this.row_lights[key][0] += program_state.animation_delta_time / 50;
-      this.row_lights[key][0] %= this.rows * 2;
-    }
 
     /**********************************
      Start coding down here!!!!
@@ -203,7 +204,7 @@ export class Balance_Ball extends Scene {
       box_m_2 = box_m_2.times(Mat4.translation(0, 0, -2));
     }
     // 3
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < 14; i++) {
       this.shapes.box.draw(context, program_state, box_m_1, this.materials.ball);
       box_m_1 = box_m_1.times(Mat4.translation(0, 0, -2));
     }
@@ -216,13 +217,11 @@ export class Balance_Ball extends Scene {
 
     // goal
     let ring_m = Mat4.identity().times(Mat4.translation(0,1,-1)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
-    let ring_m_2 = Mat4.identity().times(Mat4.translation(0,1,-1)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 0, 1, 1)).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(.2, .2, .2));
+    let ring_m_2 = Mat4.identity().times(Mat4.translation(0,1,-2)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 0, 1, 1)).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(.2, 1, .2));
     this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({
       color: color(.5, .7, .95, 1)
     }));
-    this.shapes.Diamond_ring.draw(context, program_state, ring_m_2, this.materials.plastic.override({
-      color: color(.5, .7, .95, 1)
-    }));
+    //this.shapes.Diamond_ring.draw(context, program_state, ring_m_2, this.materials.plastic.override({color: color(.5, .7, .95, 1)}));
 
     /* END - Draw some road */
     
@@ -264,35 +263,42 @@ export class Balance_Ball extends Scene {
 
 
     /* START - Falling */
-    if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -2 && this.ball[0][3] <= 2) {
-      this.safe = true;
-    }
-    if (this.ball[2][3] >= 12 && this.ball[2][3] <= 16 && this.ball[0][3] >= -2 && this.ball[0][3] <= 12) {
-      this.safe = true;
-    }
-    // 2
-    if (this.ball[2][3] >= -47 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6 && this.ball[0][3] <= 12) {
-      this.safe = true;
-    }
-    // 4
-    if (this.ball[2][3] >= -47 && this.ball[2][3] <= -44 && this.ball[0][3] >= 6 && this.ball[0][3] <= 42.5) {
-      this.safe = true;
-    }
-    // 3 
-    if (this.ball[2][3] >= -45 && this.ball[2][3] <= -14 && this.ball[0][3] >= 36 && this.ball[0][3] <= 46) {
-      this.safe = true;
-    }
-    // 1
-    if (this.ball[2][3] >= -18 && this.ball[2][3] <= -14 && this.ball[0][3] >= 6 && this.ball[0][3] <= 46) {
-      this.safe = true;
-    }
-    if (!this.safe) {
-      this.vy -= 10 * g * dt;
-      if (this.vy < -50) {
-        this.vy = -50;
-      }
-    }
+    // if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -2 && this.ball[0][3] <= 2) {
+    //   this.safe = true;
+    // }
+    // if (this.ball[2][3] >= 12 && this.ball[2][3] <= 16 && this.ball[0][3] >= -2 && this.ball[0][3] <= 12) {
+    //   this.safe = true;
+    // }
+    // // 2
+    // if (this.ball[2][3] >= -47 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6 && this.ball[0][3] <= 12) {
+    //   this.safe = true;
+    // }
+    // // 4
+    // if (this.ball[2][3] >= -47 && this.ball[2][3] <= -44 && this.ball[0][3] >= 6 && this.ball[0][3] <= 42.5) {
+    //   this.safe = true;
+    // }
+    // // 3 
+    // if (this.ball[2][3] >= -43 && this.ball[2][3] <= -14 && this.ball[0][3] >= 36 && this.ball[0][3] <= 46) {
+    //   this.safe = true;
+    // }
+    // // 1
+    // if (this.ball[2][3] >= -18 && this.ball[2][3] <= -14 && this.ball[0][3] >= 6 && this.ball[0][3] <= 46) {
+    //   this.safe = true;
+    // }
+    // if (!this.safe) {
+    //   this.vy -= 10 * g * dt;
+    //   if (this.vy < -50) {
+    //     this.vy = -50;
+    //   }
+    // }
     /* END - Falling */
+
+    // /* Light up the goal */
+    // if (((ring_m[2][3] - this.z) ** 2 + (ring_m[1][3] - this.y) ** 2 + (ring_m[0][3] - this.x) ** 2) ** (1 / 2) <= 10){
+    //   // program_state.lights.push(new Light(vec4(ring_m[0][3],10,ring_m[2][3],1), color( 1,1,1,1 ), 1000000))
+    //   this.near_goal = true;
+    // }
+      
 
     /* START - Calculate the velocity */
     if (this.left) {
@@ -340,12 +346,12 @@ export class Balance_Ball extends Scene {
     }
     /* END - Calculate the velocity */
 
-    this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball.override(blue));
     // render the ball
+    this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball.override(blue));
     if (typeof this.attached !== 'undefined') {
       program_state.set_camera(this.attached().times(Mat4.translation(0, -2, -10)));
     }
-    this.left = this.right = this.forward = this.back = this.safe = false;
     // reset
+    this.left = this.right = this.forward = this.back = this.safe = false;
   }
 }
