@@ -95,6 +95,7 @@ export class Balance_Ball extends Scene {
     this.vy = 0;
     this.vz = 0;
 
+    this.points = 0;
     this.left = this.right = this.forward = this.back = false;
     this.safe = this.near_goal = this.bonus1_hit = this.bonus2_hit = false;
   }
@@ -263,42 +264,36 @@ export class Balance_Ball extends Scene {
 
 
     /* START - Falling */
-    // if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -2 && this.ball[0][3] <= 2) {
-    //   this.safe = true;
-    // }
-    // if (this.ball[2][3] >= 12 && this.ball[2][3] <= 16 && this.ball[0][3] >= -2 && this.ball[0][3] <= 12) {
-    //   this.safe = true;
-    // }
-    // // 2
-    // if (this.ball[2][3] >= -47 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6 && this.ball[0][3] <= 12) {
-    //   this.safe = true;
-    // }
-    // // 4
-    // if (this.ball[2][3] >= -47 && this.ball[2][3] <= -44 && this.ball[0][3] >= 6 && this.ball[0][3] <= 42.5) {
-    //   this.safe = true;
-    // }
-    // // 3 
-    // if (this.ball[2][3] >= -43 && this.ball[2][3] <= -14 && this.ball[0][3] >= 36 && this.ball[0][3] <= 46) {
-    //   this.safe = true;
-    // }
-    // // 1
-    // if (this.ball[2][3] >= -18 && this.ball[2][3] <= -14 && this.ball[0][3] >= 6 && this.ball[0][3] <= 46) {
-    //   this.safe = true;
-    // }
-    // if (!this.safe) {
-    //   this.vy -= 10 * g * dt;
-    //   if (this.vy < -50) {
-    //     this.vy = -50;
-    //   }
-    // }
+    if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -2 && this.ball[0][3] <= 2) {
+      this.safe = true;
+    }
+    if (this.ball[2][3] >= 12 && this.ball[2][3] <= 16 && this.ball[0][3] >= -2 && this.ball[0][3] <= 12) {
+      this.safe = true;
+    }
+    // 2
+    if (this.ball[2][3] >= -47 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6 && this.ball[0][3] <= 12) {
+      this.safe = true;
+    }
+    // 4
+    if (this.ball[2][3] >= -47 && this.ball[2][3] <= -44 && this.ball[0][3] >= 6 && this.ball[0][3] <= 42.5) {
+      this.safe = true;
+    }
+    // 3 
+    if (this.ball[2][3] >= -43 && this.ball[2][3] <= -14 && this.ball[0][3] >= 36 && this.ball[0][3] <= 46) {
+      this.safe = true;
+    }
+    // 1
+    if (this.ball[2][3] >= -18 && this.ball[2][3] <= -14 && this.ball[0][3] >= 6 && this.ball[0][3] <= 46) {
+      this.safe = true;
+    }
+    if (!this.safe) {
+      this.vy -= 10 * g * dt;
+      if (this.vy < -50) {
+        this.vy = -50;
+      }
+    }
     /* END - Falling */
 
-    // /* Light up the goal */
-    // if (((ring_m[2][3] - this.z) ** 2 + (ring_m[1][3] - this.y) ** 2 + (ring_m[0][3] - this.x) ** 2) ** (1 / 2) <= 10){
-    //   // program_state.lights.push(new Light(vec4(ring_m[0][3],10,ring_m[2][3],1), color( 1,1,1,1 ), 1000000))
-    //   this.near_goal = true;
-    // }
-      
 
     /* START - Calculate the velocity */
     if (this.left) {
