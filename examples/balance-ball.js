@@ -115,7 +115,7 @@ export class Balance_Ball extends Scene {
 
     this.points = 0;
     this.left = this.right = this.forward = this.back = false;
-    this.safe = this.near_goal = this.bonus1_hit = this.bonus2_hit = false;
+    this.safe = this.bonus1_hit = this.bonus2_hit = false;
   }
   make_control_panel() {
     // make_control_panel(): Sets up a panel of interactive HTML elements, including
@@ -159,10 +159,6 @@ export class Balance_Ball extends Scene {
     ];
     }
     );
-    // for (const [key, val] of Object.entries(this.row_lights)) {
-    //   this.row_lights[key][0] += program_state.animation_delta_time / 1000;
-    //   this.row_lights[key][0] %= this.rows * 2;
-    // }
     for (const [key, val] of Object.entries(this.column_lights)) {
     this.column_lights[key][2] -= program_state.animation_delta_time / 1000;
       this.column_lights[key][2] %= this.columns * 2;
@@ -184,8 +180,7 @@ export class Balance_Ball extends Scene {
     const t = program_state.animation_time / 1000;
     const dt = program_state.animation_delta_time / 1000;
     const g = 9.8;
-    const blue = color(0, 0, 1, 1)
-      , yellow = color(1, 1, 0, 1);
+    const blue = color(0, 0, 1, 1);
 
     /* START - drawing background */
     //let background_m = Mat4.identity().times(Mat4.translation(0,-5,0)).times(Mat4.rotation(-Math.PI/2,1,0,0)).times(Mat4.scale(100, 100, 100));
@@ -273,10 +268,17 @@ export class Balance_Ball extends Scene {
     let bonus2_m = Mat4.translation(5, 0, 14.).times(sin_m);
 
     /* Detect collision */
-    if (((14 - this.z) ** 2 + (0 - this.x) ** 2) ** (1 / 2) <= 2)
+    if (((14 - this.z) ** 2 + (0 - this.x) ** 2) ** (1 / 2) <= 2){
+      if (red > green)
+        this.points += -1;
+      else
+        this.points += 1;
       this.bonus1_hit = true;
-    if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 2)
+    }
+    if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 2){ 
+      this.points += 1;
       this.bonus2_hit = true;
+    }
 
     if (this.bonus1_hit)
       /// don't know what to do lol
