@@ -248,7 +248,7 @@ export class Balance_Ball extends Scene {
 
     // goal
     let ring_m = Mat4.identity().times(Mat4.translation(0,1,-1)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
-    let ring_m_2 = Mat4.identity().times(Mat4.translation(0,1,-2)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 0, 1, 1)).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(.2, 1, .2));
+    //let ring_m_2 = Mat4.identity().times(Mat4.translation(0,1,-2)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 0, 1, 1)).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(.2, 1, .2));
     this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({
       color: color(.5, .7, .95, 1)
     }));
@@ -264,9 +264,11 @@ export class Balance_Ball extends Scene {
 
     let angle = 0.5 * Math.sin(0.4 * Math.PI * t);
     let wobble = Mat4.rotation(angle, 1, 1, 0);
-    let sin_m = Mat4.translation(0, 2.5 + 2.5 * Math.sin(0.4 * Math.PI * t), 0);
-    if (!this.bonus2_hit)
-      this.bonus2_m = this.bonus2_m.times(sin_m);
+    let sin_m = Mat4.translation(0, 2.5 + 2.5 * Math.sin(0.4 * Math.PI * t % (2*Math.PI)), 0);
+    let bonus2_m = this.bonus2_m;
+    if (!this.bonus2_hit){
+      bonus2_m = bonus2_m.times(sin_m);
+    }
 
     /* Detect collision */
     if (((14 - this.z) ** 2 + (0 - this.x) ** 2) ** (1 / 2) <= 2){
@@ -276,11 +278,12 @@ export class Balance_Ball extends Scene {
         this.points += 1;
       this.bonus1_hit = true;
     }
-    if (((this.bonus2_m[2][3] - this.z) ** 2 + (this.bonus2_m[1][3] - this.y) ** 2 + (this.bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 2){ 
+    if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 2){ 
       this.points += 1;
       this.bonus2_hit = true;
     }
 
+    /* Draw */
     if (this.bonus1_hit){
       if (this.bonus1_m[1][3] <= 6){
         this.bonus1_m = this.bonus1_m.times(Mat4.translation(0,0.2,0));
@@ -296,13 +299,16 @@ export class Balance_Ball extends Scene {
     }
 
     if (this.bonus2_hit){
-      if (this.bonus2_m[1][3] <= 6){
-        this.bonus2_m = this.bonus2_m.times(Mat4.translation(0,1,0));
-        this.shapes.bonus2.draw(context, program_state, this.bonus2_m, this.materials.bonus2);
+      if (bonus2_m[1][3] <= 8){
+        bonus2_m = bonus2_m.times(Mat4.translation(0,0.2,0));
+        this.shapes.bonus2.draw(context, program_state, bonus2_m, this.materials.bonus2);
+        // remember bonus2 matrix:
+        this.bonus2_m = bonus2_m;
       }
     }
     else
-      this.shapes.bonus2.draw(context, program_state, this.bonus2_m, this.materials.bonus2);
+      this.shapes.bonus2.draw(context, program_state, bonus2_m, this.materials.bonus2);
+
     //this.shapes.bonus_ring.draw(context, program_state, bonus2_m.times(wobble).times(Mat4.scale(1, 1, 0.01)), this.materials.bonus_ring);
 
     /* END - draw bonus shapes */
