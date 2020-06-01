@@ -458,6 +458,7 @@ class Diamond_Ring extends Shape
                         (Mat4.translation(10*Math.cos(i*Math.PI/6), 10*Math.sin(i*Math.PI/6), 0))
                         .times(Mat4.rotation(i*Math.PI/6, 0,0,1))
                         .times(Mat4.rotation(Math.PI/2, 1,0,0)))
+                        
         }
     }
 }
