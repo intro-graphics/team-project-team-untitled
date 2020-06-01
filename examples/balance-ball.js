@@ -92,7 +92,6 @@ export class Balance_Ball extends Scene {
         specular: 1,
         diffusivity: 1,
       }),
-
       bonus_ring: new Material(ring, {
         color: color(0.6, 0.3, 0, 1.0),
         ambient: 0.5,
@@ -116,6 +115,9 @@ export class Balance_Ball extends Scene {
     this.points = 0;
     this.left = this.right = this.forward = this.back = false;
     this.safe = this.bonus1_hit = this.bonus2_hit = false;
+
+    this.bonus1_m = Mat4.identity().times(Mat4.translation(0, 0, 14));
+    this.bonus2_m = Mat4.identity().times(Mat4.translation(5, 0, 14));
   }
   make_control_panel() {
     // make_control_panel(): Sets up a panel of interactive HTML elements, including
@@ -186,7 +188,7 @@ export class Balance_Ball extends Scene {
     //let background_m = Mat4.identity().times(Mat4.translation(0,-5,0)).times(Mat4.rotation(-Math.PI/2,1,0,0)).times(Mat4.scale(100, 100, 100));
     //this.shapes.background.draw(context, program_state, background_m, this.materials.background);
 
-    let background_m = Mat4.identity().times(Mat4.scale(100, 100, 100));
+    let background_m = Mat4.identity().times(Mat4.scale(300, 300, 300));
     let black_hole_m = Mat4.identity().times(Mat4.translation(7,-80,-3).times(Mat4.scale(20,50,20))).times(Mat4.rotation(Math.PI/2, 1,0,0))
     this.shapes.sky.draw(context, program_state, background_m, this.materials.sky);
     this.shapes.bonus1.draw(context, program_state, black_hole_m, this.materials.black);
@@ -260,12 +262,11 @@ export class Balance_Ball extends Scene {
     let green = 0.5 + 0.5 * Math.sin(0.4 * Math.PI * t - Math.PI);
     this.sun_color = color(red, green, 0, 1);
 
-    let bonus1_m = Mat4.translation(0, 0, 14);
-
     let angle = 0.5 * Math.sin(0.4 * Math.PI * t);
     let wobble = Mat4.rotation(angle, 1, 1, 0);
     let sin_m = Mat4.translation(0, 2.5 + 2.5 * Math.sin(0.4 * Math.PI * t), 0);
-    let bonus2_m = Mat4.translation(5, 0, 14.).times(sin_m);
+    if (!this.bonus2_hit)
+      this.bonus2_m = this.bonus2_m.times(sin_m);
 
     /* Detect collision */
     if (((14 - this.z) ** 2 + (0 - this.x) ** 2) ** (1 / 2) <= 2){
@@ -275,24 +276,33 @@ export class Balance_Ball extends Scene {
         this.points += 1;
       this.bonus1_hit = true;
     }
-    if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 2){ 
+    if (((this.bonus2_m[2][3] - this.z) ** 2 + (this.bonus2_m[1][3] - this.y) ** 2 + (this.bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 2){ 
       this.points += 1;
       this.bonus2_hit = true;
     }
 
-    if (this.bonus1_hit)
-      /// don't know what to do lol
-      ;
-    else
-      this.shapes.bonus1.draw(context, program_state, bonus1_m, this.materials.bonus1.override({
+    if (this.bonus1_hit){
+      if (this.bonus1_m[1][3] <= 6){
+        this.bonus1_m = this.bonus1_m.times(Mat4.translation(0,0.2,0));
+        this.shapes.bonus1.draw(context, program_state, this.bonus1_m, this.materials.bonus1.override({
+          color: this.sun_color
+        }));
+      }
+    }
+    else{
+      this.shapes.bonus1.draw(context, program_state, this.bonus1_m, this.materials.bonus1.override({
         color: this.sun_color
       }));
+    }
 
-    if (this.bonus2_hit)
-      /// fix this
-      ;
+    if (this.bonus2_hit){
+      if (this.bonus2_m[1][3] <= 6){
+        this.bonus2_m = this.bonus2_m.times(Mat4.translation(0,1,0));
+        this.shapes.bonus2.draw(context, program_state, this.bonus2_m, this.materials.bonus2);
+      }
+    }
     else
-      this.shapes.bonus2.draw(context, program_state, bonus2_m, this.materials.bonus2);
+      this.shapes.bonus2.draw(context, program_state, this.bonus2_m, this.materials.bonus2);
     //this.shapes.bonus_ring.draw(context, program_state, bonus2_m.times(wobble).times(Mat4.scale(1, 1, 0.01)), this.materials.bonus_ring);
 
     /* END - draw bonus shapes */
