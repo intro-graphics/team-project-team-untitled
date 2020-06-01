@@ -14,6 +14,8 @@ export class Balance_Ball extends Scene {
     // one called "box" more than once in display() to draw multiple cubes.
     // Don't define more than one blueprint for the same thing here.
     this.shapes = {
+      'background': new Cube(),
+      'sky': new Subdivision_Sphere(4),
       'ball': new Subdivision_Sphere(4),
       'box': new Cube(),
       'torus': new Torus(30, 30, [[0, 2], [0, 1]]),
@@ -51,6 +53,16 @@ export class Balance_Ball extends Scene {
     const phong = new defs.Phong_Shader();
     const ring = Ring_Shader;
     this.materials = {
+      background: new Material(shader, {
+        color: color(0, 0, 0, 1),
+        ambient: 1,
+        texture: new Texture("assets/background.jpg")
+      }),
+      sky: new Material(shader, {
+        color: color(0, 0, 0, 1),
+        ambient: 1,
+        texture: new Texture("assets/sky.png")
+      }),
       plastic: new Material(phong, {
         ambient: .2,
         diffusivity: 1,
@@ -126,10 +138,11 @@ export class Balance_Ball extends Scene {
       // perspective() are field of view, aspect ratio, and distances to the near plane and far plane.
       program_state.set_camera(this.initial_camera_location);
     }
-    program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 100);
+    program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 1000);
 
     // *** Lights: *** Values of vector or point lights.  They'll be consulted by
     // the shader when coloring shapes.  See Light's class definition for inputs.
+
 
     /* START - draw moving lights */
     this.light_positions.forEach((p, i, a) => {
@@ -168,12 +181,24 @@ export class Balance_Ball extends Scene {
     const blue = color(0, 0, 1, 1)
       , yellow = color(1, 1, 0, 1);
 
+    /* START - drawing background */
+    //let background_m = Mat4.identity().times(Mat4.translation(0,-5,0)).times(Mat4.rotation(-Math.PI/2,1,0,0)).times(Mat4.scale(100, 100, 100));
+    //this.shapes.background.draw(context, program_state, background_m, this.materials.background);
+
+    let background_m = Mat4.identity().times(Mat4.scale(100, 100, 100));
+    this.shapes.sky.draw(context, program_state, background_m, this.materials.sky);
+    /* END - drawing background */
+
+    /* START - update ball's position */
+
     this.ball = Mat4.identity().times(Mat4.translation(this.x, this.y, this.z)).times(Mat4.rotation(this.anglex, 1, 0, 0)).times(Mat4.rotation(this.anglez, 0, 1, 0));
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     this.z += this.vz * dt;
     this.anglex += this.vz * dt / (Math.PI);
     this.anglez += this.vx * dt / (Math.PI);
+
+    /* END - update ball's position */
 
     /* START - Draw some road */
     let box_m = Mat4.identity().times(Mat4.translation(0, -1.2, -2)).times(Mat4.scale(1.2, 0.2, 1));
