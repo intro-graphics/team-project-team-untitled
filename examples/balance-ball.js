@@ -195,7 +195,18 @@ export class Balance_Ball extends Scene {
     /* END - drawing background */
 
     /* START - update ball's position */
+    // let x_axis_ws = Mat4.of([0,0,0,1],[0,0,0,0],[0,0,0,0],[0,0,0,1]);
+    // let z_axis_ws = Mat4.of([0,0,0,0],[0,0,0,0],[0,0,0,-1],[0,0,0,1]);
+    // let x_axis_ms = x_axis_ws.times(Mat4.inverse(this.ball));
+    // let z_axis_ms = z_axis_ws.times(Mat4.inverse(this.ball));
+    // let x_x = x_axis_ms[0][3];
+    // let x_y = x_axis_ms[1][3];
+    // let x_z = x_axis_ms[2][3];
+    // let z_x = z_axis_ms[0][3];
+    // let z_y = z_axis_ms[1][3];
+    // let z_z = z_axis_ms[2][3];
 
+    // this.ball = Mat4.identity().times(Mat4.translation(this.x, this.y, this.z)).times(Mat4.rotation(this.anglez, z_x, z_y, z_z)).times(Mat4.rotation(this.anglex, x_x, x_y, x_z));
     this.ball = Mat4.identity().times(Mat4.translation(this.x, this.y, this.z)).times(Mat4.rotation(this.anglex, 1, 0, 0)).times(Mat4.rotation(this.anglez, 0, 1, 0));
     this.x += this.vx * dt;
     this.y += this.vy * dt;
@@ -215,7 +226,7 @@ export class Balance_Ball extends Scene {
       this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
       box_m = box_m.times(Mat4.translation(2, 0, 0));
     }
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < 20; i++) {
       this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
       box_m = box_m.times(Mat4.translation(0, 0, -2));
     }
@@ -230,12 +241,12 @@ export class Balance_Ball extends Scene {
 
     let box_m_2 = box_m;
     // 2
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < 10; i++) {
       this.shapes.box.draw(context, program_state, box_m_2, this.materials.ball);
       box_m_2 = box_m_2.times(Mat4.translation(0, 0, -2));
     }
     // 3
-    for (var i = 0; i < 14; i++) {
+    for (var i = 0; i < 9; i++) {
       this.shapes.box.draw(context, program_state, box_m_1, this.materials.ball);
       box_m_1 = box_m_1.times(Mat4.translation(0, 0, -2));
     }
@@ -247,12 +258,10 @@ export class Balance_Ball extends Scene {
     box_m = box_m_2;
 
     // goal
-    let ring_m = Mat4.identity().times(Mat4.translation(0,1,-1)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
-    //let ring_m_2 = Mat4.identity().times(Mat4.translation(0,1,-2)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 0, 1, 1)).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(.2, 1, .2));
-    this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({
-      color: color(.5, .7, .95, 1)
-    }));
-    //this.shapes.Diamond_ring.draw(context, program_state, ring_m_2, this.materials.plastic.override({color: color(.5, .7, .95, 1)}));
+    let ring_m = Mat4.identity().times(Mat4.translation(0,1,-1.5)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
+    // let ring_m_2 = Mat4.identity().times(Mat4.translation(0,1,-1.5)).times(box_m_1).times(Mat4.rotation(0.4*t * Math.PI / 2, 0, 1, 1)).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(.2, .2, .2));
+    this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({color: color(.5, .7, .95, 1)}));
+    // this.shapes.Diamond_ring.draw(context, program_state, ring_m_2, this.materials.plastic.override({color: color(.5, .7, .95, 1)}));
 
     /* END - Draw some road */
     
@@ -262,8 +271,8 @@ export class Balance_Ball extends Scene {
     let green = 0.5 + 0.5 * Math.sin(0.4 * Math.PI * t - Math.PI);
     this.sun_color = color(red, green, 0, 1);
 
-    let angle = 0.5 * Math.sin(0.4 * Math.PI * t);
-    let wobble = Mat4.rotation(angle, 1, 1, 0);
+    // let angle = 0.5 * Math.sin(0.4 * Math.PI * t);
+    // let wobble = Mat4.rotation(angle, 1, 1, 0);
     let sin_m = Mat4.translation(0, 2.5 + 2.5 * Math.sin(0.4 * Math.PI * t % (2*Math.PI)), 0);
     let bonus2_m = this.bonus2_m;
     if (!this.bonus2_hit){
@@ -278,14 +287,14 @@ export class Balance_Ball extends Scene {
         this.points += 1;
       this.bonus1_hit = true;
     }
-    if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 2){ 
+    if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 1.9){ 
       this.points += 1;
       this.bonus2_hit = true;
     }
 
     /* Draw */
     if (this.bonus1_hit){
-      if (this.bonus1_m[1][3] <= 6){
+      if (this.bonus1_m[1][3] <= 8){
         this.bonus1_m = this.bonus1_m.times(Mat4.translation(0,0.2,0));
         this.shapes.bonus1.draw(context, program_state, this.bonus1_m, this.materials.bonus1.override({
           color: this.sun_color
@@ -330,11 +339,11 @@ export class Balance_Ball extends Scene {
       this.safe = true;
     }
     // 3 
-    if (this.ball[2][3] >= -43 && this.ball[2][3] <= -14 && this.ball[0][3] >= 36 && this.ball[0][3] <= 46) {
+    if (this.ball[2][3] >= -43 && this.ball[2][3] <= -24 && this.ball[0][3] >= 36 && this.ball[0][3] <= 46) {
       this.safe = true;
     }
     // 1
-    if (this.ball[2][3] >= -18 && this.ball[2][3] <= -14 && this.ball[0][3] >= 6 && this.ball[0][3] <= 46) {
+    if (this.ball[2][3] >= -28 && this.ball[2][3] <= -24 && this.ball[0][3] >= 6 && this.ball[0][3] <= 46) {
       this.safe = true;
     }
     if (!this.safe) {
