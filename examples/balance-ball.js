@@ -112,10 +112,10 @@ export class Balance_Ball extends Scene {
     this.vy = 0;
     this.vz = 0;
 
-    this.points = 0;
     this.left = this.right = this.forward = this.back = false;
-    this.safe = this.bonus1_hit = this.bonus2_hit = false;
+    this.goal = this.safe = this.bonus1_hit = this.bonus2_hit = false;
 
+    this.points = 0;
     this.bonus1_m = Mat4.identity().times(Mat4.translation(0, 0, 14));
     this.bonus2_m = Mat4.identity().times(Mat4.translation(5, 0, 14));
   }
@@ -130,6 +130,8 @@ export class Balance_Ball extends Scene {
     this.new_line();
     this.key_triggered_button("Forward", ["i"], () => this.forward = true);
     this.key_triggered_button("Back", ["k"], () => this.back = true);
+    this.new_line();
+    this.live_string( box => box.textContent = "Points: " + this.points);
   }
   display(context, program_state) {
     // display():  Called once per frame of animation.
@@ -195,24 +197,14 @@ export class Balance_Ball extends Scene {
     /* END - drawing background */
 
     /* START - update ball's position */
-    // let x_axis_ws = Mat4.of([0,0,0,1],[0,0,0,0],[0,0,0,0],[0,0,0,1]);
-    // let z_axis_ws = Mat4.of([0,0,0,0],[0,0,0,0],[0,0,0,-1],[0,0,0,1]);
-    // let x_axis_ms = x_axis_ws.times(Mat4.inverse(this.ball));
-    // let z_axis_ms = z_axis_ws.times(Mat4.inverse(this.ball));
-    // let x_x = x_axis_ms[0][3];
-    // let x_y = x_axis_ms[1][3];
-    // let x_z = x_axis_ms[2][3];
-    // let z_x = z_axis_ms[0][3];
-    // let z_y = z_axis_ms[1][3];
-    // let z_z = z_axis_ms[2][3];
-
-    // this.ball = Mat4.identity().times(Mat4.translation(this.x, this.y, this.z)).times(Mat4.rotation(this.anglez, z_x, z_y, z_z)).times(Mat4.rotation(this.anglex, x_x, x_y, x_z));
-    this.ball = Mat4.identity().times(Mat4.translation(this.x, this.y, this.z)).times(Mat4.rotation(this.anglex, 1, 0, 0)).times(Mat4.rotation(this.anglez, 0, 1, 0));
-    this.x += this.vx * dt;
-    this.y += this.vy * dt;
-    this.z += this.vz * dt;
-    this.anglex += this.vz * dt / (Math.PI);
-    this.anglez += this.vx * dt / (Math.PI);
+    if (!this.goal){
+      this.ball = Mat4.identity().times(Mat4.translation(this.x, this.y, this.z)).times(Mat4.rotation(this.anglex, 1, 0, 0)).times(Mat4.rotation(this.anglez, 0, 1, 0));
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+      this.z += this.vz * dt;
+      this.anglex += this.vz * dt / (Math.PI);
+      this.anglez += this.vx * dt / (Math.PI);
+    }
 
     /* END - update ball's position */
 
@@ -258,13 +250,51 @@ export class Balance_Ball extends Scene {
     box_m = box_m_2;
 
     // goal
-    let ring_m = Mat4.identity().times(Mat4.translation(0,1,-1.5)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
-    // let ring_m_2 = Mat4.identity().times(Mat4.translation(0,1,-1.5)).times(box_m_1).times(Mat4.rotation(0.4*t * Math.PI / 2, 0, 1, 1)).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(.2, .2, .2));
+    let ring_m = Mat4.identity();
+    if (!this.goal)
+      ring_m = ring_m.times(Mat4.translation(0,1,-1.5)).times(box_m_1).times(Mat4.rotation(t * Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
+    else
+      ring_m = Mat4.identity().times(Mat4.translation(0,1,-1.5)).times(box_m_1).times(Mat4.rotation(t%(2*Math.PI), 0, 1, 0)).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(.2, .2, .2));
     this.shapes.Diamond_ring.draw(context, program_state, ring_m, this.materials.plastic.override({color: color(.5, .7, .95, 1)}));
-    // this.shapes.Diamond_ring.draw(context, program_state, ring_m_2, this.materials.plastic.override({color: color(.5, .7, .95, 1)}));
 
     /* END - Draw some road */
     
+
+    /* START - Falling */
+    if (this.ball[1][3] > -1.5 && this.ball[0][3] <= 48 && this.ball[0][3] >= 44 && this.ball[2][3] >= -47 && this.ball[2][3] <= -45 && t%2 < 1.5)
+      this.goal = true;
+
+    if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 17 && this.ball[0][3] >= -2 && this.ball[0][3] <= 2) {
+      this.safe = true;
+    }
+    if (this.ball[2][3] >= 13 && this.ball[2][3] <= 16 && this.ball[0][3] >= -2 && this.ball[0][3] <= 12) {
+      this.safe = true;
+    }
+    // 2
+    if (this.ball[2][3] >= -47 && this.ball[2][3] <= 13 && this.ball[0][3] >= 8 && this.ball[0][3] <= 11) {
+      this.safe = true;
+    }
+    // 4
+    if (this.ball[2][3] >= -47 && this.ball[2][3] <= -44 && this.ball[0][3] >= 8 && this.ball[0][3] <= 42.5) {
+      this.safe = true;
+    }
+    // 3 
+    if (this.ball[2][3] >= -43 && this.ball[2][3] <= -24 && this.ball[0][3] >= 44 && this.ball[0][3] <= 48) {
+      this.safe = true;
+    }
+    // 1
+    if (this.ball[2][3] >= -28 && this.ball[2][3] <= -24 && this.ball[0][3] >= 8 && this.ball[0][3] <= 48) {
+      this.safe = true;
+    }
+    if (!this.safe && !this.goal) {
+      this.vy -= 10 * g * dt;
+      if (this.vy < -50) {
+        this.vy = -50;
+      }
+    }
+    /* END - Falling */
+
+
     /* START - draw bonus shapes */
     this.sun_r = 2 + Math.sin(0.8 * Math.PI * t);
     let red = 0.5 + 0.5 * Math.sin(0.4 * Math.PI * t);
@@ -282,13 +312,18 @@ export class Balance_Ball extends Scene {
     /* Detect collision */
     if (((14 - this.z) ** 2 + (0 - this.x) ** 2) ** (1 / 2) <= 2){
       if (red > green)
-        this.points += -1;
+        this.points = -1;
       else
-        this.points += 1;
+        this.points = 1;
       this.bonus1_hit = true;
     }
     if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 1.9){ 
-      this.points += 1;
+      if (this.points == 1)
+        this.points = 2;
+      else if (this.points == 0)
+        this.points = 1;
+      else if (this.points == -1)
+        this.points = 0;
       this.bonus2_hit = true;
     }
 
@@ -317,85 +352,54 @@ export class Balance_Ball extends Scene {
     }
     else
       this.shapes.bonus2.draw(context, program_state, bonus2_m, this.materials.bonus2);
-
     //this.shapes.bonus_ring.draw(context, program_state, bonus2_m.times(wobble).times(Mat4.scale(1, 1, 0.01)), this.materials.bonus_ring);
 
     /* END - draw bonus shapes */
 
 
-    /* START - Falling */
-    if (this.ball[2][3] >= -3.8 && this.ball[2][3] <= 13 && this.ball[0][3] >= -2 && this.ball[0][3] <= 2) {
-      this.safe = true;
-    }
-    if (this.ball[2][3] >= 12 && this.ball[2][3] <= 16 && this.ball[0][3] >= -2 && this.ball[0][3] <= 12) {
-      this.safe = true;
-    }
-    // 2
-    if (this.ball[2][3] >= -47 && this.ball[2][3] <= 13 && this.ball[0][3] >= 6 && this.ball[0][3] <= 12) {
-      this.safe = true;
-    }
-    // 4
-    if (this.ball[2][3] >= -47 && this.ball[2][3] <= -44 && this.ball[0][3] >= 6 && this.ball[0][3] <= 42.5) {
-      this.safe = true;
-    }
-    // 3 
-    if (this.ball[2][3] >= -43 && this.ball[2][3] <= -24 && this.ball[0][3] >= 36 && this.ball[0][3] <= 46) {
-      this.safe = true;
-    }
-    // 1
-    if (this.ball[2][3] >= -28 && this.ball[2][3] <= -24 && this.ball[0][3] >= 6 && this.ball[0][3] <= 46) {
-      this.safe = true;
-    }
-    if (!this.safe) {
-      this.vy -= 10 * g * dt;
-      if (this.vy < -50) {
-        this.vy = -50;
-      }
-    }
-    /* END - Falling */
-
-
     /* START - Calculate the velocity */
-    if (this.left) {
-      this.vx = this.vx - 100 * dt;
-    } else {
-      if (this.vx < 0) {
-        this.vx = this.vx + 10 * dt;
-        if (this.vx > 0) {
-          this.vx = 0;
-        }
-      }
-    }
-
-    if (this.right) {
-      this.vx = this.vx + 100 * dt;
-    } else {
-      if (this.vx > 0) {
-        this.vx = this.vx - 10 * dt;
+    if (!this.goal){
+      if (this.left) {
+        this.vx = this.vx - 100 * dt;
+      } else {
         if (this.vx < 0) {
-          this.vx = 0;
+          this.vx = this.vx + 10 * dt;
+          if (this.vx > 0) {
+            this.vx = 0;
+          }
         }
       }
-    }
 
-    if (this.forward) {
-      this.vz = this.vz - 100 * dt;
-    } else {
-      if (this.vz < 0) {
-        this.vz = this.vz + 10 * dt;
-        if (this.vz > 0) {
-          this.vx = 0;
+      if (this.right) {
+        this.vx = this.vx + 100 * dt;
+      } else {
+        if (this.vx > 0) {
+          this.vx = this.vx - 10 * dt;
+          if (this.vx < 0) {
+            this.vx = 0;
+          }
         }
       }
-    }
 
-    if (this.back) {
-      this.vz = this.vz + 100 * dt;
-    } else {
-      if (this.vz > 0) {
-        this.vz = this.vz - 10 * dt;
+      if (this.forward) {
+        this.vz = this.vz - 100 * dt;
+      } else {
         if (this.vz < 0) {
-          this.vz = 0;
+          this.vz = this.vz + 10 * dt;
+          if (this.vz > 0) {
+            this.vx = 0;
+          }
+        }
+      }
+
+      if (this.back) {
+        this.vz = this.vz + 100 * dt;
+      } else {
+        if (this.vz > 0) {
+          this.vz = this.vz - 10 * dt;
+          if (this.vz < 0) {
+            this.vz = 0;
+          }
         }
       }
     }
