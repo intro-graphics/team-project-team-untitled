@@ -56,7 +56,7 @@ export class Balance_Ball extends Scene {
       win: new Material(shader, {
         color: color(0, 0, 0, 1),
         ambient: 1,
-        texture: new Texture("assets/win.png")
+        texture: new Texture("assets/win1.png")
       }),
       sky: new Material(shader, {
         color: color(0, 0, 0, 1),
