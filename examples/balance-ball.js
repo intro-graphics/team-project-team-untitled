@@ -112,7 +112,6 @@ export class Balance_Ball extends Scene {
     this.vx = 0;
     this.vy = 0;
     this.vz = 0;
-    this.win = false;
 
     this.left = this.right = this.forward = this.back = false;
     this.goal = this.safe = this.bonus1_hit = this.bonus2_hit = false;
@@ -187,11 +186,6 @@ export class Balance_Ball extends Scene {
     const dt = program_state.animation_delta_time / 1000;
     const g = 9.8;
     const blue = color(0, 0, 1, 1);
-
-    // victory?
-    if (42 <= this.x && this.x <= 47 && -47 <= this.z && this.z <= -43) {
-      this.win = true;
-    }
 
     /* START - drawing background */
 
@@ -414,7 +408,7 @@ export class Balance_Ball extends Scene {
     // render the ball
     this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball.override(blue));
     let camera_matrix = this.attached();
-    if (this.win) {
+    if (this.goal) {
       program_state.set_camera(Mat4.inverse(Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1))));
       this.x = this.y = this.z = 0;
       let win_m = Mat4.identity().times(Mat4.translation(27, 10, -26)).times(Mat4.scale(30, 1, 30)).times(Mat4.rotation(-Math.PI/2,1,0,0));
