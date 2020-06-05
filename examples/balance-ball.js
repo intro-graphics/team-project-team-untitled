@@ -1,7 +1,7 @@
 import { tiny, defs } from './common.js';
 
 // Pull these names into this module's scope for convenience:
-const { vec3, vec4, color, Mat4, Light, Shape, Material, Shader, Texture, Scene } = tiny;
+const { Vector, vec3, vec4, color, Mat4, Light, Shape, Material, Shader, Texture, Scene } = tiny;
 const { Triangle, Square, Tetrahedron, Windmill, Cube, Subdivision_Sphere, Ring_Shader, Torus, Diamond_Ring } = defs;
 
 export class Balance_Ball extends Scene {
@@ -101,6 +101,7 @@ export class Balance_Ball extends Scene {
     };
 
     this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+    this.attached = () => this.initial_camera_location;
 
     this.ball = Mat4.identity();
     this.x = 0;
@@ -146,7 +147,7 @@ export class Balance_Ball extends Scene {
       // treated when projecting 3D points onto a plane.  The Mat4 functions perspective() and
       // orthographic() automatically generate valid matrices for one.  The input arguments of
       // perspective() are field of view, aspect ratio, and distances to the near plane and far plane.
-      program_state.set_camera(this.initial_camera_location);
+      program_state.set_camera(Mat4.inverse(this.initial_camera_location));
     }
     program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 1000);
 
@@ -407,8 +408,10 @@ export class Balance_Ball extends Scene {
 
     // render the ball
     this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball.override(blue));
-    if (typeof this.attached !== 'undefined') {
-      program_state.set_camera(this.attached().times(Mat4.translation(0, -2, -10)));
+    let camera_matrix = this.attached();
+    if (camera_matrix !== this.initial_camera_location) {
+      program_state.set_camera(Mat4.translation(0, 2, 10).times(Mat4.inverse(camera_matrix))
+        .map((x, i) => Vector.from(program_state.camera_transform[i]).mix(x, .1)));
     }
     // reset
     this.left = this.right = this.forward = this.back = this.safe = false;

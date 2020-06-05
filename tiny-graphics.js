@@ -978,7 +978,7 @@ class Program_State extends Container
                             // often and matrix inversion is too slow to recompute needlessly.  
                             // Note that setting a camera matrix traditionally means storing the inverted version, 
                             // so that's the one this function expects to receive; it automatically sets the other.
-      Object.assign( this, { camera_transform: Mat4.inverse( matrix ), camera_inverse: matrix } )
+      Object.assign( this, { camera_transform:  matrix , camera_inverse: Mat4.inverse(matrix) } )
     }
 }
 
