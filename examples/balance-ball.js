@@ -195,7 +195,7 @@ export class Balance_Ball extends Scene {
 
     /* START - drawing background */
 
-    let background_m = Mat4.identity().times(Mat4.scale(300, 300, 300));
+    let background_m = Mat4.identity().times(Mat4.scale(200, 200, 200));
     let black_hole_m = Mat4.identity().times(Mat4.translation(7,-80,-3).times(Mat4.scale(20,50,20))).times(Mat4.rotation(Math.PI/2, 1,0,0))
     this.shapes.sky.draw(context, program_state, background_m, this.materials.sky);
     this.shapes.bonus1.draw(context, program_state, black_hole_m, this.materials.black);
