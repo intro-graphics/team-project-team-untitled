@@ -14,7 +14,7 @@ export class Balance_Ball extends Scene {
     // one called "box" more than once in display() to draw multiple cubes.
     // Don't define more than one blueprint for the same thing here.
     this.shapes = {
-      'background': new Cube(),
+      'win': new Square(),
       'sky': new Subdivision_Sphere(4),
       'ball': new Subdivision_Sphere(4),
       'box': new Cube(),
@@ -53,10 +53,10 @@ export class Balance_Ball extends Scene {
     const phong = new defs.Phong_Shader();
     const ring = Ring_Shader;
     this.materials = {
-      background: new Material(shader, {
+      win: new Material(shader, {
         color: color(0, 0, 0, 1),
         ambient: 1,
-        texture: new Texture("assets/background.jpg")
+        texture: new Texture("assets/win.png")
       }),
       sky: new Material(shader, {
         color: color(0, 0, 0, 1),
@@ -112,6 +112,7 @@ export class Balance_Ball extends Scene {
     this.vx = 0;
     this.vy = 0;
     this.vz = 0;
+    this.win = false;
 
     this.left = this.right = this.forward = this.back = false;
     this.goal = this.safe = this.bonus1_hit = this.bonus2_hit = false;
@@ -187,14 +188,18 @@ export class Balance_Ball extends Scene {
     const g = 9.8;
     const blue = color(0, 0, 1, 1);
 
+    // victory?
+    if (42 <= this.x && this.x <= 47 && -47 <= this.z && this.z <= -43) {
+      this.win = true;
+    }
+
     /* START - drawing background */
-    //let background_m = Mat4.identity().times(Mat4.translation(0,-5,0)).times(Mat4.rotation(-Math.PI/2,1,0,0)).times(Mat4.scale(100, 100, 100));
-    //this.shapes.background.draw(context, program_state, background_m, this.materials.background);
 
     let background_m = Mat4.identity().times(Mat4.scale(300, 300, 300));
     let black_hole_m = Mat4.identity().times(Mat4.translation(7,-80,-3).times(Mat4.scale(20,50,20))).times(Mat4.rotation(Math.PI/2, 1,0,0))
     this.shapes.sky.draw(context, program_state, background_m, this.materials.sky);
     this.shapes.bonus1.draw(context, program_state, black_hole_m, this.materials.black);
+
     /* END - drawing background */
 
     /* START - update ball's position */
@@ -409,10 +414,17 @@ export class Balance_Ball extends Scene {
     // render the ball
     this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball.override(blue));
     let camera_matrix = this.attached();
-    if (camera_matrix !== this.initial_camera_location) {
-      program_state.set_camera(Mat4.translation(0, 2, 10).times(Mat4.inverse(camera_matrix))
+    if (this.win) {
+      program_state.set_camera(Mat4.inverse(Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1))));
+      this.x = this.y = this.z = 0;
+      let win_m = Mat4.identity().times(Mat4.translation(27, 10, -26)).times(Mat4.scale(30, 1, 30)).times(Mat4.rotation(-Math.PI/2,1,0,0));
+      this.shapes.win.draw(context, program_state, win_m, this.materials.win);
+    }
+    else if (camera_matrix !== this.initial_camera_location) {
+      program_state.set_camera(Mat4.translation(0, 5, 10).times(Mat4.inverse(camera_matrix))
         .map((x, i) => Vector.from(program_state.camera_transform[i]).mix(x, .1)));
     }
+
     // reset
     this.left = this.right = this.forward = this.back = this.safe = false;
   }
