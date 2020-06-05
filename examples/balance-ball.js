@@ -312,20 +312,24 @@ export class Balance_Ball extends Scene {
 
     /* Detect collision */
     if (((14 - this.z) ** 2 + (0 - this.x) ** 2) ** (1 / 2) <= 2){
-      if (red > green)
-        this.points = -1;
-      else
-        this.points = 1;
-      this.bonus1_hit = true;
+      if (!this.bonus1_hit) {
+        if (red > green)
+          this.points = -1;
+        else
+          this.points = 1;
+        this.bonus1_hit = true;
+      }
     }
     if (((bonus2_m[2][3] - this.z) ** 2 + (bonus2_m[1][3] - this.y) ** 2 + (bonus2_m[0][3] - this.x) ** 2) ** (1 / 2) <= 1.9){ 
-      if (this.points == 1)
-        this.points = 2;
-      else if (this.points == 0)
-        this.points = 1;
-      else if (this.points == -1)
-        this.points = 0;
-      this.bonus2_hit = true;
+      if(!this.bonus2_hit) {
+        if (this.points == 1)
+          this.points = 2;
+        else if (this.points == 0)
+          this.points = 1;
+        else if (this.points == -1)
+          this.points = 0;
+        this.bonus2_hit = true;
+      }
     }
 
     /* Draw */
