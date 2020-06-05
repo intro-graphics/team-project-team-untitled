@@ -101,6 +101,7 @@ export class Balance_Ball extends Scene {
     };
 
     this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+    this.panorama_view = Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1));
     this.attached = () => this.initial_camera_location;
 
     this.ball = Mat4.identity();
@@ -124,7 +125,7 @@ export class Balance_Ball extends Scene {
     // make_control_panel(): Sets up a panel of interactive HTML elements, including
     // buttons with key bindings for affecting this scene, and live info readouts.
     this.key_triggered_button("Fixed View", ["b"], () => this.attached = () => Mat4.look_at(vec3(this.ball[0][3], this.ball[1][3] + 2, this.ball[2][3] + 10), vec3(this.ball[0][3], this.ball[1][3], this.ball[2][3]), vec3(0, 1, 1)));
-    this.key_triggered_button("Panorama View", ["p"], () => this.attached = () => Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1)));
+    this.key_triggered_button("Panorama View", ["p"], () => this.attached = () => this.panorama_view);
     this.new_line();
     this.key_triggered_button("Left", ["j"], () => this.left = true);
     this.key_triggered_button("Right", ["l"], () => this.right = true);
@@ -408,13 +409,17 @@ export class Balance_Ball extends Scene {
     // render the ball
     this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball.override(blue));
     let camera_matrix = this.attached();
-    if (this.goal) {
-      program_state.set_camera(Mat4.inverse(Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1))));
-      this.x = this.y = this.z = 0;
+    if (this.goal && camera_matrix == this.panorama_view) {
+      // program_state.set_camera(Mat4.inverse(Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1))));
+      // this.x = this.y = this.z = 0;
       let win_m = Mat4.identity().times(Mat4.translation(27, 10, -26)).times(Mat4.scale(30, 1, 30)).times(Mat4.rotation(-Math.PI/2,1,0,0));
       this.shapes.win.draw(context, program_state, win_m, this.materials.win);
     }
-    else if (camera_matrix !== this.initial_camera_location) {
+    else if (this.goal && camera_matrix !== this.panorama_view){
+      let win_m = Mat4.identity().times(Mat4.translation(this.ball[0][3], this.ball[1][3] + 5, this.ball[2][3] + 8)).times(Mat4.scale(5, 5, 1))
+      this.shapes.win.draw(context, program_state, win_m, this.materials.win);
+    }
+    if (camera_matrix !== this.initial_camera_location) {
       program_state.set_camera(Mat4.translation(0, 5, 10).times(Mat4.inverse(camera_matrix))
         .map((x, i) => Vector.from(program_state.camera_transform[i]).mix(x, .1)));
     }
