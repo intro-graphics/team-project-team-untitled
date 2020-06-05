@@ -1,6 +1,15 @@
 # 3D Extreme Balance Ball
+Ballance is a 3D puzzle video game built with tiny-graphics.
 
-![image](https://github.com/intro-graphics/team-project-team-untitled/demo.png)
+Some advance features we used:
+* Ray Tracing
+* Shadowing
+* Collision Detection
+* Scene Graphs
+* Physics-based simulation
+* Bump Mapping
+
+![image](https://github.com/intro-graphics/team-project-team-untitled/blob/master/demo.png)
 
 ### To run:
 Clone this repo / download the files to a local directory.     
