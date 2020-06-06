@@ -2,12 +2,8 @@
 Ballance is a 3D puzzle video game built with tiny-graphics.
 
 Some advance features we used:
-* Ray Tracing
-* Shadowing
 * Collision Detection
-* Scene Graphs
 * Physics-based simulation
-* Bump Mapping
 
 ![image](https://github.com/intro-graphics/team-project-team-untitled/blob/master/demo.png)
 
