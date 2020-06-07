@@ -24,7 +24,8 @@ export class Balance_Ball extends Scene {
       'bonus_ring': new (Torus.prototype.make_flat_shaded_version())(15, 15, [[0, 2], [0, 1]]),
       'Diamond_ring': new Diamond_Ring(4, 4, [[0, 1], [0, 1]]),
     };
-
+    console.log(this.shapes.ball.texture_coord);
+    this.shapes.ball.arrays.texture_coord = this.shapes.ball.arrays.texture_coord.map(v => Vector.of(v[0] * 2, v[1] * 2))
     /* START - define moving lights */
 
     this.light_positions = [];
@@ -76,6 +77,11 @@ export class Balance_Ball extends Scene {
         color: color(.9, .5, .9, 1)
       }),
       ball: new Material(shader, {
+        color: color(1, 1, 1, 1),
+        ambient: .4,
+        texture: new Texture("assets/bruin.jpg")
+      }),
+      route: new Material(shader, {
         color: color(.4, .8, .4, 1),
         ambient: .4,
         texture: new Texture("assets/stars.png")
@@ -212,15 +218,15 @@ export class Balance_Ball extends Scene {
     /* START - Draw some road */
     let box_m = Mat4.identity().times(Mat4.translation(0, -1.2, -2)).times(Mat4.scale(1.2, 0.2, 1));
     for (var i = 0; i < 8; i++) {
-      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
+      this.shapes.box.draw(context, program_state, box_m, this.materials.route);
       box_m = box_m.times(Mat4.translation(0, 0, 2));
     }
     for (var i = 0; i < 4; i++) {
-      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
+      this.shapes.box.draw(context, program_state, box_m, this.materials.route);
       box_m = box_m.times(Mat4.translation(2, 0, 0));
     }
     for (var i = 0; i < 20; i++) {
-      this.shapes.box.draw(context, program_state, box_m, this.materials.ball);
+      this.shapes.box.draw(context, program_state, box_m, this.materials.route);
       box_m = box_m.times(Mat4.translation(0, 0, -2));
     }
 
@@ -228,24 +234,24 @@ export class Balance_Ball extends Scene {
     let box_m_1 = box_m;
     // 1    /// TO FIX: ROLLING BECOMES STRANGE HERE
     for (var i = 0; i < 15; i++) {
-      this.shapes.box.draw(context, program_state, box_m_1, this.materials.ball);
+      this.shapes.box.draw(context, program_state, box_m_1, this.materials.route);
       box_m_1 = box_m_1.times(Mat4.translation(2, 0, 0));
     }
 
     let box_m_2 = box_m;
     // 2
     for (var i = 0; i < 10; i++) {
-      this.shapes.box.draw(context, program_state, box_m_2, this.materials.ball);
+      this.shapes.box.draw(context, program_state, box_m_2, this.materials.route);
       box_m_2 = box_m_2.times(Mat4.translation(0, 0, -2));
     }
     // 3
     for (var i = 0; i < 9; i++) {
-      this.shapes.box.draw(context, program_state, box_m_1, this.materials.ball);
+      this.shapes.box.draw(context, program_state, box_m_1, this.materials.route);
       box_m_1 = box_m_1.times(Mat4.translation(0, 0, -2));
     }
     // 4
     for (var i = 0; i < 14; i++) {
-      this.shapes.box.draw(context, program_state, box_m_2, this.materials.ball);
+      this.shapes.box.draw(context, program_state, box_m_2, this.materials.route);
       box_m_2 = box_m_2.times(Mat4.translation(2, 0, 0));
     }
     box_m = box_m_2;
@@ -411,7 +417,7 @@ export class Balance_Ball extends Scene {
     /* END - Calculate the velocity */
 
     // render the ball
-    this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball.override(blue));
+    this.shapes.ball.draw(context, program_state, this.ball, this.materials.ball);
     let camera_matrix = this.attached();
     if (this.goal && camera_matrix == this.panorama_view) {
       // program_state.set_camera(Mat4.inverse(Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1))));
