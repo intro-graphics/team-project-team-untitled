@@ -56,7 +56,7 @@ export class Balance_Ball extends Scene {
       win: new Material(shader, {
         color: color(0, 0, 0, 1),
         ambient: 1,
-        texture: new Texture("assets/win1.png")
+        texture: new Texture("assets/bruin1.png")
       }),
       sky: new Material(shader, {
         color: color(0, 0, 0, 1),
@@ -416,11 +416,11 @@ export class Balance_Ball extends Scene {
     if (this.goal && camera_matrix == this.panorama_view) {
       // program_state.set_camera(Mat4.inverse(Mat4.look_at(vec3(30, 90, -30), vec3(30, 0, -30), vec3(0, 0, -1))));
       // this.x = this.y = this.z = 0;
-      let win_m = Mat4.identity().times(Mat4.translation(27, 10, -26)).times(Mat4.scale(30, 1, 30)).times(Mat4.rotation(-Math.PI/2,1,0,0));
+      let win_m = Mat4.identity().times(Mat4.translation(27, 8, -26)).times(Mat4.scale(30, 1, 30)).times(Mat4.rotation(-Math.PI/2,1,0,0));
       this.shapes.win.draw(context, program_state, win_m, this.materials.win);
     }
     else if (this.goal && camera_matrix !== this.panorama_view){
-      let win_m = Mat4.identity().times(Mat4.translation(this.ball[0][3], this.ball[1][3] + 5, this.ball[2][3] + 8)).times(Mat4.scale(5, 5, 1))
+      let win_m = Mat4.identity().times(Mat4.translation(this.ball[0][3], this.ball[1][3] + 4, this.ball[2][3] + 8)).times(Mat4.scale(5, 5, 1))
       this.shapes.win.draw(context, program_state, win_m, this.materials.win);
     }
     if (camera_matrix !== this.initial_camera_location) {
