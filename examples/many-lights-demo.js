@@ -15,6 +15,7 @@ export class Many_Lights_Demo extends Scene
       Object.assign( this, { rows: 20, columns: 35 } );
 
       this.shapes = { cube: new defs.Cube() };
+
       const shader = new defs.Fake_Bump_Map();
       this.brick = new Material( shader, { color: color( 1,1,1,1 ),
                                  ambient: .05, diffusivity: .5, specularity: .5, smoothness: 10, 
